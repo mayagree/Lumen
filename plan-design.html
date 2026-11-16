@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · Plan my night</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Anton&family=Oswald:wght@200..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="type.css?v=3">
+<script src="fullscreen.js"></script>
+<style>
+  :root { --ink: #f7fafc; --soft: rgba(244,248,251,.86); --faint: rgba(244,248,251,.5); --accent: #ff3b2f; --poster: url("posters/odyssey2.webp"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #111; color: var(--ink); font-family: var(--f-text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px; }
+  button, a { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-decoration: none; }
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; overflow: clip; position: relative; background: #2a3540; isolation: isolate; }
+  @media (max-width: 700px) { html, body { overflow: hidden; } body { display: block; padding: 0; } .phone { width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; } }
+  .bg { position: absolute; inset: 0; z-index: -2; }
+  .bg .wash { position: absolute; inset: -30%; background: var(--poster) center 60% / cover; filter: blur(70px) saturate(1.5) brightness(.85); }
+  .bg .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,24,40,.45), rgba(8,20,34,.72)); }
+  .grain { position: absolute; inset: 0; z-index: 9; pointer-events: none; opacity: .28; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+  /* The assistant's light at the edges while it plans. */
+  .aura { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; transition: opacity 1s ease;
+    background: linear-gradient(90deg, rgba(255,60,50,.3), transparent 4%, transparent 96%, rgba(255,60,50,.3)), linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%), linear-gradient(180deg, rgba(255,60,50,.2), transparent 5%); }
+  .thinking .aura { opacity: 1; animation: breathe 3s ease-in-out infinite alternate; }
+  @keyframes breathe { to { filter: brightness(1.4); } }
+
+  .scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; padding: 54px var(--edge) 170px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top .x { width: 36px; height: 36px; border-radius: 50%; background: rgba(244,248,251,.12); display: grid; place-items: center; }
+  .top .x svg { width: 12px; height: 12px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
+  .label { display: block; font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+
+  /* The ask, then Lumen's answer. */
+  .ask { margin-top: var(--s-3); align-self: flex-end; margin-left: auto; width: max-content; max-width: 80%; padding: 10px 16px; border-radius: 20px 20px 6px 20px; background: rgba(244,248,251,.14); font: 400 15px/1.4 var(--f-text); }
+  .from { margin-top: var(--s-3); display: flex; align-items: center; gap: 8px; }
+  .from i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .dots { display: flex; gap: 5px; margin-top: 12px; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--soft); animation: dot 1s ease-in-out infinite; }
+  .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 50% { opacity: .25; transform: translateY(-2px); } }
+  .ready .dots { display: none; }
+  .intro { margin-top: 10px; font: 400 17px/1.45 var(--f-text); }
+
+  .plan { margin-top: var(--s-2); border-radius: 24px; background: rgba(244,248,251,.08); backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3); overflow: hidden; }
+  .item { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 16px 18px; border-top: 1px solid rgba(244,248,251,.08); width: 100%; text-align: left; transition: background .3s ease; }
+  .item:first-child { border-top: 0; }
+  .item:active { background: rgba(244,248,251,.06); }
+  .item .label { grid-column: 1 / 3; color: var(--faint); }
+  .item b { font: 500 22px/1.15 "Oswald", sans-serif; letter-spacing: .015em; }
+  .item .chev { align-self: center; color: var(--faint); font-size: 20px; }
+  .item p { grid-column: 1 / 3; font: 400 13px/1.45 var(--f-text); color: var(--soft); }
+  .item.film { grid-template-columns: 52px 1fr auto; }
+  .item.film .label { grid-column: 1 / 4; }
+  .item.film .p { width: 52px; height: 74px; border-radius: 9px; background: var(--poster) center 62% / cover; grid-row: 2 / 4; }
+  .item.film b { font: 400 26px/1 "Anton", sans-serif; text-transform: uppercase; color: var(--accent); align-self: end; }
+  .item.film p { grid-column: 2 / 4; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 18px; border-top: 1px solid rgba(244,248,251,.12); }
+  .total span { font: 400 15px/1 var(--f-text); color: var(--soft); }
+  .total b { font: var(--t-number-s); font-size: 22px; letter-spacing: .02em; }
+  .note { margin-top: var(--s-2); font: 400 13px/1.45 var(--f-text); color: var(--faint); }
+
+  /* Each part arrives in turn, out of a blur, as if written. */
+  .reveal { opacity: 0; filter: blur(8px); transform: translateY(8px); transition: opacity .7s ease, filter .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .reveal.on { opacity: 1; filter: none; transform: none; }
+
+  .actions { position: absolute; left: var(--edge); right: var(--edge); bottom: 30px; z-index: 7; display: grid; gap: 8px; }
+  .actions::before { content: ""; position: absolute; left: -22px; right: -22px; top: -60px; bottom: -30px; z-index: -1; background: linear-gradient(180deg, transparent, rgba(8,20,34,.7) 45%); pointer-events: none; }
+  .book { height: 60px; border-radius: 30px; display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14);
+    backdrop-filter: blur(10px) saturate(1.5); -webkit-backdrop-filter: blur(10px) saturate(1.5); }
+  .book b { font: var(--t-button); } .book span { font: var(--t-number-s); letter-spacing: .025em; }
+  .change { height: 44px; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+  /* B: the film name in white. */
+  .vB .item.film b { color: var(--ink); }
+  /* C: like our ticket cards: the poster on top, the facts in a row, no reasons. */
+  .card { display: none; }
+  .vC .plan, .vC .note { display: none; }
+  .vC .card { display: block; margin-top: var(--s-2); border-radius: 24px; overflow: hidden; background: rgba(244,248,251,.08); backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3); }
+  .cshot { position: relative; height: 230px; background: var(--poster) center 62% / cover; }
+  .cshot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(12,22,34,.75)); }
+  .cbody { position: absolute; left: 18px; right: 18px; bottom: 14px; z-index: 1; }
+  .cbody b { display: block; font: 400 40px/.95 "Anton", sans-serif; text-transform: uppercase; color: var(--accent); }
+  .cbody .label { margin-top: 6px; }
+  .cfacts { display: grid; grid-template-columns: 1.1fr .6fr 1fr; gap: 8px; padding: 16px 18px; }
+  .cfacts small { display: block; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+  .cfacts b { display: block; margin-top: 4px; font: var(--t-number-s); font-size: 22px; letter-spacing: .025em; }
+  .crow { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 18px; border-top: 1px solid rgba(244,248,251,.08); font: 400 15px/1.3 var(--f-text); }
+  .crow b { font: var(--t-number-s); font-size: 20px; font-weight: 300; }
+  .crow.tot span { color: var(--soft); } .crow.tot b { font-weight: 500; font-size: 22px; }
+  .why, .why-msg { display: none; }
+  /* D: the ticket card, with a short reason under each part. */
+  .vD .plan, .vD .note, .vE .plan, .vE .note { display: none; }
+  .vD .card, .vE .card { display: block; margin-top: var(--s-2); border-radius: 24px; overflow: hidden; background: rgba(244,248,251,.08); backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3); }
+  .vD .why { display: block; padding: 0 18px 14px; font: 400 13px/1.4 var(--f-text); color: var(--soft); }
+  .vD .why1 { padding-top: 12px; }
+  .vD .cfacts { padding-bottom: 8px; }
+  .vD .crow + .why { margin-top: -6px; }
+  /* E: the ticket card, then the reasons as a second message from Lumen. */
+  .vE .why-msg { display: block; margin-top: var(--s-3); }
+  .why-msg p { margin-top: 10px; font: 400 15px/1.5 var(--f-text); color: var(--soft); }
+  .whys { list-style: none; margin-top: 10px; display: grid; gap: 12px; }
+  .whys li { position: relative; padding-left: 16px; font: 400 15px/1.45 var(--f-text); color: var(--soft); }
+  .whys li::before { content: ""; position: absolute; left: 0; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--faint); }
+  .whys .label { color: var(--faint); margin-bottom: 2px; }
+  .tap { display: block; width: 100%; text-align: left; position: relative; }
+  .tap .chev { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 20px; color: var(--faint); }
+  .cshot.tap .chev { top: 18px; transform: none; color: var(--ink); z-index: 1; }
+  .cfacts.tap { display: grid; padding-right: 40px; border-top: 1px solid rgba(244,248,251,.08); }
+  .crow.tap { display: flex; padding-right: 40px; }
+  .crow.tap b { margin-right: 4px; }
+  .tap:active { background: rgba(244,248,251,.05); }
+  /* Talk to Lumen: a mic beside Book it. */
+  .arow { display: flex; gap: 10px; }
+  .arow .book { flex: 1; }
+  .mic { width: 60px; height: 60px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(244,248,251,.14);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: background .4s ease; }
+  .mic svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linecap: round; }
+  .listening .mic { background: radial-gradient(70% 140% at 30% 30%, rgba(255,59,47,.5), transparent 75%), rgba(255,59,47,.22); }
+  .say { display: flex; align-items: center; gap: 12px; padding: 0 6px; height: 0; opacity: 0; overflow: hidden; transition: height .4s ease, opacity .4s ease; }
+  .listening .say, .heard .say { height: 44px; opacity: 1; }
+  .say p { font: 400 15px/1.35 var(--f-text); color: var(--ink); }
+  .wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+  .wave i { width: 3px; height: 6px; border-radius: 2px; background: var(--accent); animation: wv .9s ease-in-out infinite; }
+  .wave i:nth-child(2) { animation-delay: .1s; } .wave i:nth-child(3) { animation-delay: .2s; } .wave i:nth-child(4) { animation-delay: .3s; } .wave i:nth-child(5) { animation-delay: .4s; }
+  @keyframes wv { 50% { height: 18px; } }
+  .heard .wave { display: none; }
+  .swap .card, .swap .why-msg { opacity: 0; filter: blur(10px); transition: opacity .5s ease, filter .5s ease; }
+  .card, .why-msg { transition: opacity .6s ease, filter .6s ease; }
+  /* Book it with friends: split the bill, share one link, each pays their part. */
+  .split { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 11; padding: 22px 20px 20px; border-radius: 30px;
+    background: rgba(244,248,251,.1); backdrop-filter: blur(28px) saturate(1.2) brightness(.85); -webkit-backdrop-filter: blur(28px) saturate(1.2) brightness(.85);
+    transform: translateY(110%); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .splitOn .split { transform: none; }
+  .splitOn .actions { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  .split .shead { display: flex; justify-content: space-between; align-items: center; }
+  .split .shead b { font: 500 17px/1.2 var(--f-text); }
+  .sx { width: 36px; height: 36px; border-radius: 50%; background: rgba(244,248,251,.12); display: grid; place-items: center; }
+  .sx svg { width: 12px; height: 12px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
+  .snote { margin-top: 6px; font: 400 13px/1.4 var(--f-text); color: var(--soft); }
+  .who { display: grid; gap: 8px; margin-top: var(--s-2); }
+  .who .p { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: rgba(244,248,251,.06); }
+  .who .av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: rgba(244,248,251,.16); font: 500 13px/1 var(--f-text); }
+  .who .n { flex: 1; font: 400 15px/1.3 var(--f-text); }
+  .who .n small { display: block; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
+  .who b { font: var(--t-number-s); font-size: 20px; }
+  .who .p.paid .n small { color: var(--ink); }
+  .who .p.paid .av { background: radial-gradient(70% 140% at 30% 30%, rgba(255,59,47,.5), transparent 75%), rgba(255,59,47,.22); }
+  .share { width: 100%; height: 56px; margin-top: var(--s-2); border-radius: 28px; display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14); font: var(--t-button); }
+  .share svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .payall { display: block; margin-top: 12px; text-align: center; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+  .share { background: rgba(244,248,251,.16) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  /* Listening, in our own light: no bars. The edges glow and breathe (the aura), and a soft red light swells behind the words. */
+  .wave { display: none !important; }
+  .say { position: relative; justify-content: center; }
+  .say::before { content: ""; position: absolute; left: 10%; right: 10%; top: -14px; bottom: -14px; z-index: -1; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,90,75,.55), rgba(255,59,47,.18) 60%, transparent); filter: blur(14px); opacity: 0; }
+  .listening .say::before { animation: listen 1.6s ease-in-out infinite alternate; }
+  @keyframes listen { from { opacity: .35; transform: scale(.7, .8); } to { opacity: 1; transform: scale(1.05, 1.1); } }
+  .say p { text-align: center; }
+  .listening .aura { opacity: 1; animation: breathe 1.6s ease-in-out infinite alternate; }
+  /* The glow is free: nothing clips it, it spreads well past the words and fades out on every side. */
+  .say { overflow: visible !important; }
+  .say::before { left: -10%; right: -10%; top: -46px; bottom: -40px; border-radius: 50%;
+    background: radial-gradient(50% 50% at 50% 55%, rgba(255,90,75,.5), rgba(255,59,47,.16) 55%, transparent 80%); filter: blur(22px); }
+  /* While Lumen listens, the words take the place of Book it, on the same line as the mic. */
+  .actions { position: absolute; }
+  .say { position: absolute !important; left: 0; right: 70px; bottom: 0; height: 60px !important; padding: 0 !important; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+  .listening .say, .heard .say { opacity: 1; }
+  .arow .book { transition: opacity .45s ease, filter .45s ease; }
+  .listening .arow .book, .heard .arow .book { opacity: 0; filter: blur(8px); pointer-events: none; }
+  .actions::before { background: linear-gradient(180deg, transparent, rgba(8,20,34,.78) 40%) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%); mask-image: linear-gradient(180deg, transparent, #000 40%); }
+  /* Book it on its own line; under it, a line to type or talk to Lumen. */
+  .book.solo { width: 100%; }
+  .actions { gap: 10px !important; }
+  .arow { position: relative; display: flex; align-items: center; height: 52px; border-radius: 26px; background: rgba(244,248,251,.1);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 0 6px 0 18px; }
+  .type { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--ink); font: 400 15px/1 var(--f-text); transition: opacity .4s ease; }
+  .type::placeholder { color: rgba(244,248,251,.5); }
+  .arow .mic { width: 40px; height: 40px; }
+  .arow .mic svg { width: 18px; height: 18px; }
+  .say { left: 0 !important; right: 52px !important; bottom: auto !important; top: auto !important; height: 52px !important; }
+  .actions .say { position: absolute; bottom: 0 !important; }
+  .listening .type, .heard .type { opacity: 0; }
+  .listening .arow .book, .heard .arow .book { opacity: 1; filter: none; }
+  .arow .say { position: absolute !important; left: 18px !important; right: 52px !important; top: 0 !important; bottom: 0 !important; height: auto !important; justify-content: flex-start; z-index: 1; }
+  .arow .say p { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Listening stays inside the typing line. */
+  .arow { overflow: hidden; isolation: isolate; }
+  .arow .say::before { left: -18px; right: -52px; top: -10px; bottom: -10px; border-radius: 26px; filter: blur(10px);
+    background: radial-gradient(60% 120% at 40% 50%, rgba(255,90,75,.55), rgba(255,59,47,.15) 60%, transparent 90%); }
+  .listening .aura { opacity: 0 !important; animation: none !important; }
+  /* A frosted header that stays, with the close. */
+  .top.fixed { position: absolute; left: 0; right: 0; top: 0; z-index: 8; padding: 50px var(--edge) 14px; }
+  .top.fixed::before { content: ""; position: absolute; inset: 0 0 -24px; z-index: -1; pointer-events: none; background: linear-gradient(180deg, rgba(12,22,34,.55), transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
+  .scroll { padding-top: 104px !important; }
+  .ways, .each { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-top: 1px solid rgba(244,248,251,.1); font: 400 15px/1 var(--f-text); }
+  .ways { margin-top: var(--s-2); }
+  .step { display: flex; align-items: center; gap: 14px; }
+  .step button { width: 34px; height: 34px; border-radius: 50%; background: rgba(244,248,251,.12); font-size: 18px; color: var(--ink); }
+  .step b, .each b { font: var(--t-number-s); font-size: 22px; min-width: 18px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="phone thinking" id="phone">
+  <div class="bg"><div class="wash"></div><div class="shade"></div></div>
+  <div class="top fixed"><span class="label">Plan my night</span><a class="x" href="home-design.html" aria-label="Close"><svg viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8"/></svg></a></div>
+  <div class="scroll">
+
+
+    <p class="ask">Plan tonight for the two of us.</p>
+
+    <div class="from"><i></i><span class="label">Lumen</span></div>
+    <div class="dots"><i></i><i></i><i></i></div>
+    <p class="intro reveal">Here's your night. Everything is held for 10 minutes.</p>
+
+    <div class="plan">
+      <button class="item film reveal"><span class="label">Film</span><i class="p"></i><b>The Odyssey</b><span class="chev">›</span>
+        <p>You loved Interstellar and Dune, and saved this one in October.</p></button>
+      <button class="item reveal"><span class="label">When</span><b>Fri 13, 20:40</b><span class="chev">›</span>
+        <p>IMAX, Hall 4. The film itself starts at 20:58. Leave home at 20:05.</p></button>
+      <button class="item reveal"><span class="label">Seats</span><b>F6, F7</b><span class="chev">›</span>
+        <p>Your usual row was taken, so one row closer and still centered. A 9.7 view.</p></button>
+      <button class="item reveal"><span class="label">Snacks</span><b>Popcorn L, refill</b><span class="chev">›</span>
+        <p>For two and a 2h 50m film. Last time a medium ran out halfway.</p></button>
+      <div class="total reveal"><span>Total, student price</span><b>₪122</b></div>
+    </div>
+    <p class="note reveal">Tap any part to change it.</p>
+
+    <div class="card reveal">
+      <button class="cshot tap"><div class="cbody"><b id="cTitle">The Odyssey</b><span class="label" id="cMeta">IMAX · 2h 50m</span></div><i class="chev">›</i></button>
+      <p class="why why1">You loved Interstellar and Dune.</p>
+      <button class="cfacts tap"><div><small>Fri 13</small><b id="cTime">20:40</b></div><div><small>Hall</small><b id="cHall">4</b></div><div><small>Seats</small><b id="cSeats">F6 F7</b></div><i class="chev">›</i></button>
+      <p class="why">Film starts 20:58. Your usual row was taken, so one closer.</p>
+      <button class="crow tap"><span id="cPop">Popcorn L, refill</span><b id="cPopP">₪46</b><i class="chev">›</i></button>
+      <p class="why">Last time a medium ran out halfway.</p>
+      <div class="crow tot"><span>Total, student price</span><b id="cTot">₪122</b></div>
+    </div>
+    <div class="why-msg reveal">
+      <div class="from"><i></i><span class="label">Lumen</span></div>
+      <ul class="whys">
+        <li><span class="label">Film</span>Made for IMAX, like Interstellar and Dune.</li>
+        <li><span class="label">Seats</span>Swallowed by the screen, and still seeing all of it.</li>
+        <li><span class="label">Snacks</span>A long one for two: a large, and a refill at the break.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="actions reveal" id="actions">
+    <a class="book solo" href="my-night-design.html?celebrate=1"><b>Book it</b><span id="bookP">₪122</span></a>
+    <div class="arow"><div class="say" id="say"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><p id="sayText">Listening…</p></div><input class="type" id="typeIn" placeholder="Ask Lumen to change something" autocomplete="off">
+    <button class="mic" id="mic" aria-label="Tell Lumen what to change"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button></div>
+  </div>
+  <div class="split" id="split">
+    <div class="shead"><b>Split the bill</b><button class="sx" id="splitX" aria-label="Close"><svg viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8"/></svg></button></div>
+    <p class="snote" id="splitNote">Send one link. Each friend pays their part, and everything stays held for 10 minutes.</p>
+    <div class="ways"><span>Split between</span><div class="step"><button id="wLess" aria-label="Fewer">−</button><b id="wN">2</b><button id="wMore" aria-label="More">+</button></div></div>
+    <div class="each"><span>Each pays</span><b id="wEach">₪0</b></div>
+    <button class="share" id="shareBtn"><svg viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span id="shareText">Share a pay link</span></button>
+    <a class="payall" href="my-night-design.html?celebrate=1" id="payAll">Pay for everyone, <span id="payAllP">₪122</span></a>
+  </div>
+  <div class="aura"></div>
+  <div class="grain"></div>
+</div>
+<script>
+  const phone = document.getElementById('phone');
+  const BACK = new URLSearchParams(location.search).get('back');
+  if (BACK) { phone.classList.remove('thinking'); phone.classList.add('ready'); document.querySelectorAll('.reveal').forEach(p => p.classList.add('on')); }
+  document.fonts.ready.then(() => { if (BACK) { if (sessionStorage.getItem('lumenPlanState') === 'horror') window.replanNow && window.replanNow(); return; }
+    const parts = [...document.querySelectorAll('.reveal')];
+    setTimeout(() => { phone.classList.add('ready');
+      parts.forEach((p, i) => setTimeout(() => p.classList.add('on'), i * 420));
+      setTimeout(() => phone.classList.remove('thinking'), parts.length * 420 + 600); }, 1600);
+  });
+  { const v = new URLSearchParams(location.search).get('v'); if (v) phone.classList.add('v' + v.toUpperCase()); }
+  // Each part opens its own screen.
+  document.addEventListener('click', e => { const t = e.target.closest('.tap'); if (!t) return;
+    sessionStorage.setItem('lumenPlanState', document.querySelectorAll('.card').length > 1 ? 'horror' : 'first');
+    location.href = (t.classList.contains('cshot') ? 'film-design.html?poster=odyssey2&pos=center%2062%25&guided=0' : t.classList.contains('cfacts') ? 'seats-design.html?guided=0' : 'snacks-design.html?guided=0') + '&from=plan'; });
+
+  // The mic: Lumen listens, then answers below, like a conversation; the first plan stays above.
+  let micT = [];
+  document.getElementById('mic').addEventListener('click', () => {
+    if (phone.classList.contains('listening') || phone.classList.contains('heard')) { micT.forEach(clearTimeout); micT = []; phone.classList.remove('listening', 'heard', 'thinking'); return; }
+    const say = document.getElementById('sayText'), sc = document.querySelector('.scroll');
+    const glide = () => { const from = sc.scrollTop, to = sc.scrollHeight - sc.clientHeight, t0 = performance.now();
+      const step = () => { const k = Math.min(1, (performance.now() - t0) / 900), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; sc.scrollTop = from + (to - from) * e; if (k < 1) setTimeout(step, 16); }; step(); };
+    phone.classList.add('listening', 'thinking'); say.textContent = 'Listening…';
+    micT.push(setTimeout(() => {
+      phone.classList.remove('listening'); phone.classList.add('heard'); say.textContent = '“A friend is joining, and we want horror.”';
+    }, 2400));
+    micT.push(setTimeout(() => window.replanNow(true), 3800));
+  });
+  window.replanNow = (animate = false) => {
+      const sc = document.querySelector('.scroll');
+      const glide = () => { if (!animate) { sc.scrollTop = sc.scrollHeight; return; } const from = sc.scrollTop, to = sc.scrollHeight - sc.clientHeight, t0 = performance.now();
+        const step = () => { const k = Math.min(1, (performance.now() - t0) / 900), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; sc.scrollTop = from + (to - from) * e; if (k < 1) setTimeout(step, 16); }; step(); };
+      phone.classList.remove('heard');
+      const ask = document.createElement('p'); ask.className = 'ask reveal'; ask.textContent = 'A friend is joining, and we want horror.';
+      const from = document.createElement('div'); from.className = 'from reveal'; from.innerHTML = '<i></i><span class="label">Lumen</span>';
+      const intro = document.createElement('p'); intro.className = 'intro reveal'; intro.textContent = 'Got it. Here is a night for three.';
+      const card = document.querySelector('.card').cloneNode(true); card.classList.remove('on');
+      const shot = card.querySelector('.cshot'); shot.style.backgroundImage = "url('posters/PNG/gAgWJhUSQWCgtKR8170nMkYlBda.webp')"; shot.style.backgroundPosition = 'center 40%';
+      const set = (id, v) => { const el = card.querySelector('#' + id); el.removeAttribute('id'); el.textContent = v; };
+      set('cTitle', 'Resident Evil'); set('cMeta', 'Horror · 1h 47m'); set('cTime', '21:30'); set('cHall', '2'); set('cSeats', 'E7–E9');
+      set('cPop', 'Popcorn XL, 3 drinks'); set('cPopP', '₪87'); set('cTot', '₪201');
+      const why = document.querySelector('.why-msg').cloneNode(true); why.classList.remove('on');
+      why.querySelector('.whys').innerHTML = '<li><span class="label">Film</span>The scariest one tonight, and short enough to sleep after.</li><li><span class="label">Seats</span>Three together, a little back: scared, never swallowed.</li><li><span class="label">Snacks</span>An XL to share, and a drink each.</li>';
+      const host = document.querySelector('.why-msg').parentNode;
+      [ask, from, intro, card, why].forEach(n => host.appendChild(n));
+      document.getElementById('bookP').textContent = '₪201';
+      glide();
+      if (!animate) [ask, from, intro, card, why].forEach(n => n.classList.add('on')); else [ask, from, intro, card, why].forEach((n, i) => setTimeout(() => { n.classList.add('on'); if (i > 1) glide(); }, 250 + i * 450));
+      setTimeout(() => { phone.classList.remove('thinking'); glide(); }, animate ? 2800 : 0);
+  };
+  // Book it: split between how many (no names: Lumen can't know who), one link to share, or pay for everyone.
+  { let n = 2, total = 122;
+    const upd = () => { document.getElementById('wN').textContent = n; document.getElementById('wEach').textContent = '₪' + Math.ceil(total / n); document.getElementById('payAllP').textContent = '₪' + total; };
+    document.querySelector('.book').addEventListener('click', e => { e.preventDefault();
+      const three = document.querySelectorAll('.card').length > 1; total = three ? 201 : 122; n = three ? 3 : 2;
+      document.getElementById('shareText').textContent = 'Share a pay link'; upd(); phone.classList.add('splitOn'); });
+    document.getElementById('splitX').addEventListener('click', () => phone.classList.remove('splitOn'));
+    document.getElementById('wLess').addEventListener('click', () => { n = Math.max(2, n - 1); upd(); });
+    document.getElementById('wMore').addEventListener('click', () => { n = Math.min(8, n + 1); upd(); });
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      const url = location.origin + '/prototype/my-night-design.html';
+      try { if (navigator.share) await navigator.share({ title: 'Lumen', text: 'Pay your part for tonight', url }); else await navigator.clipboard.writeText(url); } catch (er) {}
+      document.getElementById('shareText').textContent = 'Link sent';
+      setTimeout(() => location.href = 'my-night-design.html?celebrate=1', 1300); }); }
+</script>
+</body>
+</html>

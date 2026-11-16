@@ -1,0 +1,38 @@
+/* Lumen type system.
+   Four families, each with one job:
+   - Anton: names and headings (what something is called).
+   - Oswald: numbers you choose or compare (dates, times, scores).
+   - JetBrains Mono: labels and metadata, always in caps. Also personal notes, in sentence case.
+   - Inter Tight: text you read, and buttons.
+   Each style below is a `font` shorthand (weight size/line-height family).
+   Tracking and case go with the style, as listed next to it. */
+:root {
+  --f-display: "Anton", sans-serif;
+  --f-number: "Oswald", sans-serif;
+  --f-label: "JetBrains Mono", ui-monospace, monospace;
+  --f-text: "Inter Tight", system-ui, sans-serif;
+
+  /* Anton · caps · tracking .01em */
+  --t-display-xl: 400 88px/.9 var(--f-display);   /* film title on the film page */
+  --t-display-l: 400 80px/.9 var(--f-display);    /* home greeting */
+  --t-display-m: 400 40px/.95 var(--f-display);   /* film titles on cards, next film, the match number */
+  --t-heading: 400 32px/1 var(--f-display);       /* section headings: Pick a time, About */
+
+  /* Oswald · tracking .025em */
+  --t-number-l: 430 27px/1.2 var(--f-number);     /* show times · chosen: white + 2px red line */
+  --t-number-m: 430 24px/1.15 var(--f-number);    /* dates · chosen: white + 2px red line */
+  --t-number-s: 430 20px/1 var(--f-number);       /* scores on the film page */
+  --w-number-on: 600;                             /* the chosen date or time */
+
+  /* JetBrains Mono · caps */
+  --t-label-l: 500 13px/1.3 var(--f-label);       /* tracking .08em · rail titles, filters, Next */
+  --t-label: 500 11px/1.45 var(--f-label);        /* tracking .04em · meta, hall names, credits titles, links */
+  --t-caption: 400 10px/1.3 var(--f-label);       /* tracking .08em · words under numbers: Match, IMDb, Fri */
+  --t-note: 400 12px/1.6 var(--f-label);          /* tracking .02em · sentence case · personal notes */
+
+  /* Inter Tight */
+  --t-body: 400 15px/1.6 var(--f-text);           /* reading text: synopsis, cast, empty states */
+  --t-button: 500 17px/1.2 var(--f-text);         /* main action */
+  --t-ui: 400 14px/1.2 var(--f-text);             /* small controls: cinema picker */
+  --t-tab: 500 10px/1.2 var(--f-text);            /* tab bar names */
+}

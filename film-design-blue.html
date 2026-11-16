@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · Film page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f7fafc;
+    --soft: rgba(244,248,251,.86);
+    --faint: rgba(244,248,251,.3);
+    --halo: rgba(190,225,250,.38);
+    --deep: #123049;
+    --poster: url("posters/odyssey.webp");
+    --pos: center 18%;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; }
+  body { font-family: "Inter Tight", system-ui, sans-serif; color: var(--ink); display: grid; place-items: center; }
+  button, a { font: inherit; color: inherit; background: none; border: 0; text-decoration: none; cursor: pointer; }
+
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; position: relative; background: var(--deep); }
+  @media (max-width: 500px) { body { display: block; } .phone { width: 100vw; height: 100dvh; border-radius: 0; } }
+
+  /* Background: the poster melts down into the page.
+     1. A heavily blurred copy fills the whole screen with the poster's colours.
+     2. The sharp poster sits on top and fades out.
+     3. Stacked blur bands make the edge dissolve gradually instead of cutting off. */
+  .bg { position: absolute; inset: 0; pointer-events: none; }
+  .bg .wash { position: absolute; inset: -30%; background: var(--poster) center 30% / cover; filter: blur(70px) saturate(1.45) brightness(1.3); }
+  .art { position: absolute; left: 0; right: 0; top: 0; height: 600px; pointer-events: none; }
+  .art .fade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,28,46,.25) 0%, transparent 18%, transparent 100%); }
+  .art .poster { position: absolute; left: 0; right: 0; top: 0; height: 560px; background: var(--poster) var(--pos) / cover;
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, transparent 100%); }
+  .art .smear { position: absolute; left: -10%; right: -10%; top: 280px; height: 520px; background: var(--poster) center 70% / 100% 260%;
+    filter: blur(22px) saturate(1.3); opacity: .75;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 55%, transparent 100%); }
+  .art .band { position: absolute; left: 0; right: 0; top: 260px; height: 360px; }
+  .art .band i { position: absolute; inset: 0; }
+  .art .band i:nth-child(1) { backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 50%, transparent 75%); mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 50%, transparent 75%); }
+  .art .band i:nth-child(2) { backdrop-filter: blur(6px); -webkit-mask-image: linear-gradient(180deg, transparent 25%, #000 50%, #000 75%, transparent 100%); mask-image: linear-gradient(180deg, transparent 25%, #000 50%, #000 75%, transparent 100%); }
+  .art .band i:nth-child(3) { backdrop-filter: blur(28px); -webkit-mask-image: linear-gradient(180deg, transparent 50%, #000 75%); mask-image: linear-gradient(180deg, transparent 50%, #000 75%); }
+  .bg .shade { position: absolute; inset: 0; background:
+      linear-gradient(180deg, rgba(14,40,64,.05) 0%, rgba(14,38,60,.25) 60%, rgba(12,32,52,.45) 100%); }
+  .bg .grain { position: absolute; inset: 0; opacity: .26; mix-blend-mode: overlay;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+
+  .scroll { position: absolute; inset: 0; isolation: isolate; overflow-y: auto; scrollbar-width: none; padding-bottom: 140px; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .top, .hero, section, .next { position: relative; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 58px 22px 0; font-size: 15px; }
+  .top .back { font-size: 26px; line-height: 1; opacity: .85; }
+  .top .trailer { display: flex; align-items: center; gap: 8px; opacity: .9; }
+  .top .trailer i { font-style: normal; font-size: 10px; }
+
+  .hero { padding: 268px 22px 0; }
+  h1 { font-size: 52px; font-weight: 600; line-height: .92; letter-spacing: -.035em; text-transform: uppercase; }
+  .meta { margin-top: 12px; font-size: 14px; color: var(--soft); }
+
+  .scores { display: flex; gap: 26px; margin-top: 26px; }
+  .scores a { display: grid; gap: 2px; }
+  .scores b { font-size: 22px; font-weight: 400; letter-spacing: -.01em; }
+  .scores span { font-size: 11px; color: var(--soft); letter-spacing: .02em; }
+  .why { margin-top: 10px; font-size: 13px; color: var(--soft); max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .why.open { max-height: 40px; }
+
+  section { padding: 40px 22px 0; }
+  .label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); font-weight: 400; }
+  h2 { font-size: 26px; font-weight: 500; letter-spacing: -.02em; }
+  h2.h3 { font-size: 20px; }
+  .weekhead { display: flex; justify-content: space-between; align-items: baseline; }
+  .weekhead span { font-size: 13px; color: var(--soft); }
+
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 18px; text-align: center; }
+  .day { padding: 8px 0 10px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  .day small { display: block; font-size: 11px; color: var(--soft); }
+  .day b { display: block; font-size: 20px; font-weight: 400; margin-top: 2px; }
+  .day.past, .day.none { color: var(--ink); opacity: .2; }
+  .day.busy { opacity: .55; }
+  .day.on b { font-weight: 500; }
+  .day.on::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 22px; margin-left: -11px; height: 1.5px; border-radius: 2px; background: var(--ink); }
+  .day { isolation: isolate; }
+  .day.sug::before { content: ""; position: absolute; left: -10px; right: -10px; top: -4px; bottom: -4px; z-index: -1; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(225,240,255,.4), rgba(200,228,250,.14) 65%, transparent); filter: blur(8px); }
+
+  .formats { margin-top: 18px; display: grid; gap: 22px; }
+  .fmt .label { margin-bottom: 8px; }
+  .times { display: flex; gap: 26px; }
+  .time { isolation: isolate; font-size: 26px; font-weight: 300; letter-spacing: -.02em; position: relative; padding-bottom: 8px; color: var(--ink); }
+  .time.on { font-weight: 400; }
+  .time.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px; border-radius: 2px; background: var(--ink); }
+  .time.sug::before { content: ""; position: absolute; left: -26px; right: -26px; top: -14px; bottom: -10px; z-index: -1; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(225,240,255,.38), rgba(200,228,250,.14) 65%, transparent); filter: blur(8px); }
+  .time.busy { opacity: .55; }
+
+  .note-sug { margin-top: 18px; font-size: 13px; color: var(--soft); }
+  .note-sug i { display: inline-block; width: 26px; height: 16px; border-radius: 50%; background: radial-gradient(closest-side, rgba(225,240,255,.75), transparent); filter: blur(2px); margin-right: 6px; vertical-align: -3px; }
+  .empty { margin-top: 18px; font-size: 15px; color: var(--soft); line-height: 1.5; }
+  .empty a { color: var(--ink); border-bottom: 1px solid var(--faint); }
+
+  .about p { margin-top: 12px; font-size: 16px; line-height: 1.6; color: rgba(238,243,247,.86); }
+  .credits { margin-top: 22px; display: grid; grid-template-columns: 80px 1fr; gap: 10px 14px; font-size: 14px; }
+  .credits dt { color: var(--soft); }
+  .credits .as { color: var(--soft); }
+  .link { display: inline-block; margin-top: 10px; font-size: 14px; color: var(--ink); opacity: .85; }
+  .link:hover { opacity: 1; }
+  .fine { margin-top: 18px; font-size: 12px; color: var(--soft); }
+
+  .note { position: relative; padding: 22px 24px; isolation: isolate; }
+  .note::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(244,248,251,.1);
+    backdrop-filter: blur(26px) saturate(1.3); -webkit-backdrop-filter: blur(26px) saturate(1.3);
+    -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 35%, transparent 100%); mask-image: radial-gradient(ellipse 72% 80% at 50% 50%, #000 35%, transparent 100%); }
+  .note span { font-size: 12px; color: var(--soft); }
+  .note p { font-size: 15px; line-height: 1.5; margin-top: 4px; }
+
+  .next { margin-top: 40px; height: 220px; background: url("posters/whalefall.webp") center 22% / cover; position: relative; overflow: hidden; display: block;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 45%); mask-image: linear-gradient(180deg, transparent 0%, #000 45%); }
+  .next::after { content: ""; position: absolute; inset: 0; backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 60%); mask-image: linear-gradient(180deg, #000 0%, transparent 60%); }
+  .next span { position: absolute; left: 22px; top: 92px; z-index: 1; font-size: 12px; color: var(--soft); }
+  .next b { display: block; font-size: 18px; color: var(--ink); letter-spacing: .02em; }
+
+  /* The one action: a soft, frosted bar, not a hard button. */
+  .cta { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 22px 34px; z-index: 5;
+    background: linear-gradient(180deg, transparent, rgba(14,38,60,.45) 45%); }
+  .cta a { display: flex; justify-content: space-between; align-items: center; height: 58px; padding: 0 22px; border-radius: 30px;
+    background: rgba(238,243,247,.14); border: 1px solid rgba(238,243,247,.18);
+    backdrop-filter: blur(24px) saturate(1.3); -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 30px rgba(0,0,0,.25); transition: background .2s; }
+  .cta a:hover { background: rgba(238,243,247,.2); }
+  .cta b { font-size: 17px; font-weight: 500; }
+  .cta span { font-size: 13px; color: var(--soft); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="bg"><div class="wash"></div><div class="shade"></div><div class="grain"></div></div>
+
+  <div class="scroll">
+    <div class="art"><div class="smear"></div><div class="poster"></div><div class="band"><i></i><i></i><i></i></div><div class="fade"></div></div>
+    <div class="top"><a class="back" href="#">‹</a><a class="trailer" href="#"><i>▶</i>Trailer · 2:31</a></div>
+
+    <div class="hero">
+      <h1>The<br>Odyssey</h1>
+      <p class="meta">Christopher Nolan · 2h 50m · Adventure · PG-13</p>
+      <div class="scores">
+        <a class="match" href="#" id="match"><b>94%</b><span>Match</span></a>
+        <a href="https://www.imdb.com/find/?q=The%20Odyssey" target="_blank" rel="noopener"><b>8.4</b><span>IMDb</span></a>
+        <a href="https://www.rottentomatoes.com/search?search=The%20Odyssey" target="_blank" rel="noopener"><b>91%</b><span>Tomatoes</span></a>
+        <a href="https://letterboxd.com/search/The%20Odyssey/" target="_blank" rel="noopener"><b>4.2</b><span>Letterboxd</span></a>
+      </div>
+      <p class="why" id="why">Because you rated Interstellar ★5 and saved this on Letterboxd.</p>
+    </div>
+
+    <section>
+      <div class="weekhead"><h2>Pick a time</h2><span>‹ &nbsp;8–14 Nov&nbsp; ›</span></div>
+      <div class="days" id="days"></div>
+      <div id="times"></div>
+    </section>
+
+    <section class="about">
+      <h2 class="h3">About</h2>
+      <p>After the fall of Troy, Odysseus fights his way home across a hostile sea. Ten years, a hundred monsters and one stubborn god stand between him and his family, while suitors take over his house.</p>
+      <dl class="credits">
+        <dt>Director</dt><dd>Christopher Nolan</dd>
+        <dt>Cast</dt><dd>Matt Damon <span class="as">as Odysseus</span><br>Tom Holland <span class="as">as Telemachus</span><br>Anne Hathaway <span class="as">as Penelope</span><br>Zendaya <span class="as">as Athena</span><br>
+          <a class="link" href="https://www.imdb.com/find/?q=The%20Odyssey" target="_blank" rel="noopener">Full cast on IMDb ›</a></dd>
+      </dl>
+      <p class="fine">English · Rated PG-13</p>
+    </section>
+
+    <section>
+      <div class="note"><span>Your note · 2 Oct</span><p>Noa: only in IMAX, sit center. Long one, eat first.</p></div>
+    </section>
+
+    <a class="next" href="#"><span>Next<b>WHALEFALL</b></span></a>
+  </div>
+
+  <div class="cta"><a href="#" id="cta"><b>Choose seats</b><span id="ctasub">Fri 13 · 20:40 IMAX ›</span></a></div>
+</div>
+
+<script>
+  const DAYS = [['Sun', 8, 'past'], ['Today', 9, ''], ['Tue', 10, 'none'], ['Wed', 11, 'busy'], ['Thu', 12, ''], ['Fri', 13, 'sug'], ['Sat', 14, '']];
+  const FORMATS = [['IMAX · Hall 4', ['20:40', '23:10']], ['Standard · Hall 2', ['17:30', '19:15']], ['4DX · Hall 6', ['21:00']]];
+  const BUSY = { '13 23:10': 1, '11 20:40': 1, '11 23:10': 1, '11 17:30': 1, '11 19:15': 1, '11 21:00': 1, '12 17:30': 1, '12 19:15': 1 };
+  const SUG = '13 20:40';
+  let day = 13, time = '20:40';
+  function render() {
+    document.getElementById('days').innerHTML = DAYS.map(([n, d, s]) =>
+      `<button class="day ${s} ${d === day ? 'on' : ''}" data-d="${d}" ${s === 'past' ? 'disabled' : ''}><small>${n}</small><b>${d}</b></button>`).join('');
+    const none = DAYS.find(x => x[1] === day)[2] === 'none';
+    document.getElementById('times').innerHTML = none
+      ? `<p class="empty">No screenings on Tue 10.<br><a href="#" data-go="12 20:40">Closest free: Thu 12, 20:40 ›</a></p>`
+      : `<div class="formats">${FORMATS.map(([f, ts]) => `<div class="fmt"><p class="label">${f}</p><div class="times">${ts.map(t => {
+          const k = day + ' ' + t, busy = BUSY[k];
+          return `<button class="time ${t === time ? 'on' : ''} ${k === SUG ? 'sug' : ''} ${busy ? 'busy' : ''}" data-t="${t}">${t}</button>`; }).join('')}</div></div>`).join('')}</div>
+        ${day === 13 ? '<p class="note-sug"><i></i>Suggested: you usually go on weekends after 20:00</p>' : ''}`;
+    const dn = DAYS.find(x => x[1] === day)[0];
+    document.getElementById('ctasub').textContent = none ? 'Pick a day ›' : `${dn === 'Today' ? 'Today' : dn} ${day} · ${time} ›`;
+  }
+  document.addEventListener('click', e => {
+    const d = e.target.closest('[data-d]'), t = e.target.closest('[data-t]'), g = e.target.closest('[data-go]');
+    if (e.target.closest('#match')) { e.preventDefault(); document.getElementById('why').classList.toggle('open'); }
+    if (d) { day = +d.dataset.d; render(); }
+    if (t) { time = t.dataset.t; render(); }
+    if (g) { e.preventDefault(); [day, time] = [+g.dataset.go.split(' ')[0], g.dataset.go.split(' ')[1]]; render(); }
+  });
+  render();
+  const q = new URLSearchParams(location.search);
+  if (q.get('poster')) {
+    document.documentElement.style.setProperty('--poster', `url("posters/${q.get('poster')}.webp")`);
+    if (q.get('pos')) document.documentElement.style.setProperty('--pos', q.get('pos'));
+  }
+  if (window.parent !== window) document.querySelector('.back').addEventListener('click', e => { e.preventDefault(); parent.postMessage('lumen:back', '*'); });
+</script>
+</body>
+</html>

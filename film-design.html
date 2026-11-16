@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · Film page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Anton&family=Oswald:wght@200..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="type.css">
+<style>
+  :root {
+    --ink: #f7fafc;
+    --soft: rgba(244,248,251,.86);
+    --faint: rgba(244,248,251,.3);
+    --halo: rgba(190,225,250,.38);
+    --deep: #123049;
+    --poster: url("posters/odyssey.webp");
+    --pos: center 18%;
+    --accent: #ff3b2f;
+    --display: "Anton", sans-serif;
+    --condensed: "Oswald", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  /* Small text everywhere: mono caps, like the home page. */
+  .meta, .scores span, .label, .weekhead span, .day small, .note span, .credits dt, .fine, .next span, .cta span, .note-sug, .why, .top .trailer, .link {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; }
+  body { font-family: "Inter Tight", system-ui, sans-serif; color: var(--ink); display: grid; place-items: center; }
+  button, a { font: inherit; color: inherit; background: none; border: 0; text-decoration: none; cursor: pointer; }
+
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; position: relative; background: var(--deep); }
+  @media (max-width: 500px) { body { display: block; } .phone { width: 100vw; height: 100dvh; border-radius: 0; } }
+
+  /* Background: the poster melts down into the page.
+     1. A heavily blurred copy fills the whole screen with the poster's colours.
+     2. The sharp poster sits on top and fades out.
+     3. Stacked blur bands make the edge dissolve gradually instead of cutting off. */
+  .bg { position: absolute; inset: 0; pointer-events: none; }
+  .bg .wash { position: absolute; inset: -30%; background: var(--poster) center 30% / cover; filter: blur(70px) saturate(1.35) brightness(1.02); }
+  .art { position: absolute; left: 0; right: 0; top: 0; height: 700px; pointer-events: none; }
+  .art .fade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,28,46,.25) 0%, transparent 18%, transparent 100%); }
+  .art .poster { position: absolute; left: 0; right: 0; top: 0; height: 660px; background: var(--poster) var(--pos) / cover;
+    -webkit-mask-image: linear-gradient(180deg, #000 66%, transparent 100%); mask-image: linear-gradient(180deg, #000 66%, transparent 100%); }
+  .art .smear { position: absolute; left: -10%; right: -10%; top: 380px; height: 520px; background: var(--poster) center 70% / 100% 260%;
+    filter: blur(22px) saturate(1.3); opacity: .75;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 55%, transparent 100%); }
+  .art .band { position: absolute; left: 0; right: 0; top: 370px; height: 340px; }
+  .art .band i { position: absolute; inset: 0; }
+  .art .band i:nth-child(1) { backdrop-filter: blur(2px); -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 50%, transparent 75%); mask-image: linear-gradient(180deg, transparent 0%, #000 25%, #000 50%, transparent 75%); }
+  .art .band i:nth-child(2) { backdrop-filter: blur(6px); -webkit-mask-image: linear-gradient(180deg, transparent 25%, #000 50%, #000 75%, transparent 100%); mask-image: linear-gradient(180deg, transparent 25%, #000 50%, #000 75%, transparent 100%); }
+  .art .band i:nth-child(3) { backdrop-filter: blur(28px); -webkit-mask-image: linear-gradient(180deg, transparent 45%, #000 68%, #000 78%, transparent 100%); mask-image: linear-gradient(180deg, transparent 45%, #000 68%, #000 78%, transparent 100%); }
+  .bg .shade { position: absolute; inset: 0; background:
+      linear-gradient(180deg, rgba(14,30,46,.36) 0%, rgba(14,30,46,.42) 45%, rgba(10,24,38,.56) 100%); }
+  .bg .grain { position: absolute; inset: 0; opacity: .38; mix-blend-mode: overlay;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+
+  .scroll { position: absolute; inset: 0; isolation: isolate; overflow-y: auto; scrollbar-width: none; padding-bottom: 0; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  .top, .hero, section, .next { position: relative; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 58px 22px 0; font-size: 15px; }
+  .top .back { font-size: 26px; line-height: 1; opacity: .85; }
+  .top .trailer { display: flex; align-items: center; gap: 8px; opacity: .9; }
+  .top .right { display: flex; align-items: center; gap: 20px; }
+  .top .list { display: grid; place-items: center; }
+  .top .list svg { width: 22px; height: 22px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 4px rgba(0,0,0,.35)); }
+  .top .list .done { display: none; }
+  .top .list.saved .add { display: none; }
+  .top .list.saved .done { display: inline; }
+  .top .trailer i { font-style: normal; font-size: 10px; }
+
+  .hero { padding: 336px 22px 0; }
+  h1 { font-family: var(--display); font-size: 88px; font-weight: 400; line-height: .88; letter-spacing: .01em; text-transform: uppercase; color: var(--accent); }
+  .meta { margin-top: 14px; color: var(--soft); }
+
+  .scores { display: flex; gap: 22px; margin-top: 22px; align-items: end; }
+  .scores a { display: grid; gap: 5px; }
+  .scores b { font-family: var(--mono); font-size: 15px; font-weight: 500; line-height: 1; }
+  .scores .match { margin-right: 6px; }
+  .scores .match b { font-family: var(--display); font-size: 40px; font-weight: 400; }
+  .scores .match span { color: var(--ink); }
+  .scores span { font-size: 10px; color: var(--soft); }
+  .why { margin-top: 12px; line-height: 1.5; color: var(--soft); max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .why.open { max-height: 40px; }
+
+  section { padding: 40px 22px 0; }
+  .label { color: var(--soft); font-weight: 400; }
+  h2 { font-family: var(--display); font-size: 32px; font-weight: 400; line-height: 1; letter-spacing: .01em; text-transform: uppercase; }
+  h2.h3 { font-size: 28px; }
+  section.about { padding-top: 56px; }
+  .weekhead { display: flex; justify-content: space-between; align-items: baseline; }
+  .weekhead span { color: var(--soft); }
+
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 18px; text-align: center; }
+  .day { padding: 8px 0 10px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+  .day small { display: block; font-size: 9px; color: var(--soft); }
+  .day b { position: relative; display: block; font-family: var(--condensed); font-size: 27px; font-weight: 400; margin-top: 4px; line-height: 1.15; }
+  .day.past { opacity: .22; }
+  .day.none { opacity: .5; }
+  .day.none b::after { content: ""; position: absolute; left: -5px; right: -5px; top: 50%; height: 1.2px; background: currentColor; transform: rotate(-38deg); }
+  .day.busy { opacity: .4; }
+  .day.on b, .day.on small { color: var(--ink); }
+  .day.sug::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 22px; margin-left: -11px; height: 1px; background: var(--accent); }
+
+  .formats { margin-top: 16px; display: grid; gap: 18px; }
+  .fmt .label { margin-bottom: 8px; }
+  .times { display: flex; gap: 26px; }
+  .time { isolation: isolate; font-family: var(--condensed); font-size: 30px; font-weight: 430; letter-spacing: .025em; position: relative; padding-bottom: 6px; color: var(--ink); }
+  .time.on { color: var(--ink); font-weight: 400; }
+  .time.sug::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--accent); }
+  .time.busy { opacity: .4; }
+
+  .note-sug { margin-top: 24px; font-size: 11px; letter-spacing: .02em; color: var(--soft); }
+  .note-sug u { text-decoration: none; color: var(--ink); padding-bottom: 3px; border-bottom: 1px solid var(--accent); }
+  .note-sug i { display: inline-block; width: 26px; height: 16px; border-radius: 50%; background: radial-gradient(closest-side, rgba(225,240,255,.75), transparent); filter: blur(2px); margin-right: 6px; vertical-align: -3px; }
+  .empty { margin-top: 18px; font-size: 15px; color: var(--soft); line-height: 1.5; }
+  .empty a { color: var(--ink); border-bottom: 1px solid var(--faint); }
+
+  .about p { margin-top: 12px; font-size: 15px; line-height: 1.6; color: rgba(238,243,247,.86); }
+  .credits { margin-top: 22px; display: grid; grid-template-columns: 80px 1fr; gap: 10px 14px; font-size: 14px; align-items: baseline; }
+  .credits dt { color: var(--soft); }
+  .credits .as { color: var(--soft); }
+  .link { display: inline-block; margin-top: 18px; color: var(--ink); }
+  .link i { font-style: normal; display: inline-block; padding: 1px 5px 0; margin: 0 2px; border-radius: 3px; background: var(--ink); color: var(--accent); }
+  .link:hover { opacity: 1; }
+  .about .fine { margin-top: 18px; font-size: 11px; line-height: 1.4; color: var(--soft); }
+
+  .note { position: relative; padding: 22px 24px; isolation: isolate; }
+  .note::before { content: ""; position: absolute; inset: -10px -16px; z-index: -1; background: radial-gradient(ellipse 60% 70% at 40% 50%, rgba(244,248,251,.08), transparent 100%); }
+  .note span { color: var(--soft); }
+  .note p { font-family: var(--mono); font-size: 12px; line-height: 1.6; letter-spacing: .02em; margin-top: 6px; }
+
+  .next-label { padding: 56px 29px 12px; font-family: var(--mono); font-size: 14px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+  .next { margin: 0 8px; height: 330px; border-radius: 32px 32px 0 0; background: url("posters/whalefall.png") center 24% / auto 760px;
+    position: relative; overflow: hidden; display: block; isolation: isolate;
+    border: 1px solid rgba(255,255,255,.2); border-bottom: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 -16px 40px rgba(0,0,0,.28); }
+  /* Frosted top edge: the glass is thickest where the card begins, and clears towards the middle. */
+  .next::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  .next::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(14,30,46,.35) 0%, transparent 45%);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 48%); mask-image: linear-gradient(180deg, #000 0%, #000 18%, transparent 48%); }
+  .next b { position: absolute; left: 20px; top: 20px; z-index: 1; display: block; font-family: var(--display); font-size: 40px; font-weight: 400; color: var(--accent); letter-spacing: .01em; }
+
+  /* The one action: a soft, frosted bar, not a hard button. */
+  .cta { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 22px 34px; z-index: 5;
+    background: linear-gradient(180deg, transparent, rgba(14,38,60,.45) 45%); }
+  .cta a { display: flex; justify-content: space-between; align-items: center; height: 58px; padding: 0 22px; border-radius: 30px;
+    background: rgba(238,243,247,.14); border: 1px solid rgba(238,243,247,.18);
+    backdrop-filter: blur(24px) saturate(1.3); -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 10px 30px rgba(0,0,0,.25); transition: background .2s; }
+  .cta a:hover { background: rgba(238,243,247,.2); }
+  .cta a { border: 0 !important; box-shadow: none !important; background: rgba(244,248,251,.12); }
+  .aipick .cta a { background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.5), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.4), transparent 75%), rgba(255,59,47,.22); border-color: transparent; }
+  .cta b { font-size: 17px; font-weight: 500; }
+  .cta span { font-size: 10px; color: var(--soft); }
+
+  /* ---------- Type system (styles from type.css). Every text on the page uses one of these. ---------- */
+  h1 { font: var(--t-display-xl); letter-spacing: .01em; text-transform: uppercase; }
+  h2, h2.h3 { font: var(--t-heading); letter-spacing: .01em; text-transform: uppercase; }
+  .scores .match b, .next b { font: var(--t-display-m); letter-spacing: .01em; text-transform: uppercase; }
+  .scores b { font: var(--t-number-s); letter-spacing: .025em; }
+  .day b { font: var(--t-number-m); letter-spacing: .025em; }
+  .time { font: var(--t-number-l); letter-spacing: .025em; }
+  .day.on b, .time.on { font-weight: var(--w-number-on); }
+  .next-label { font: var(--t-label-l); letter-spacing: .08em; text-transform: uppercase; }
+  .meta, .label, .weekhead span, .note span, .credits dt, .cta span, .note-sug, .why, .top .trailer, .link {
+    font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; }
+  .scores span, .day small { font: var(--t-caption); letter-spacing: .08em; text-transform: uppercase; }
+  .note p { font: var(--t-note); letter-spacing: .02em; }
+  .about p, .credits dd, .empty { font: var(--t-body); }
+  .cta b { font: var(--t-button); }
+
+  /* Red marks: the chosen date and time get a heavier weight; the suggestion line is 2px. The % of the match is red. */
+  /* Chosen: a 2px red line. Suggested: a thin white line. */
+  .day.sug::after, .time.sug::after { height: 1px; background: var(--accent); }
+  .day.on::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 22px; margin-left: -11px; height: 2px; background: var(--accent); }
+  .time.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); }
+  .note-sug { word-spacing: -.3em; }
+  .scores .match b i { font-style: normal; color: var(--accent); }
+
+  /* ---------- Spacing (scale from type.css) ---------- */
+  section { padding: var(--s-6) var(--edge) 0; }
+  section.about { padding-top: var(--s-6); }
+  .meta { margin-top: var(--s-2); }
+  .scores { margin-top: var(--s-4); gap: var(--s-3); }
+  .scores .match { margin-right: 0; }
+  .scores a { gap: var(--s-1); }
+  .days { margin-top: var(--s-2); }
+  .formats { margin-top: var(--s-4); gap: var(--s-3); }
+  .fmt .label { margin-bottom: var(--s-1); }
+  .note-sug { margin-top: var(--s-4); }
+  .about p { margin: var(--s-2) 0 0; }
+
+  /* ---------- v10 ---------- */
+  /* A shorter poster: title, scores and the start of Pick a time all fit in the first screen. */
+  .art { height: 600px; }
+  .art .poster { height: 450px; -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%); mask-image: linear-gradient(180deg, #000 62%, transparent 100%); }
+  .art .smear { top: 250px; height: 420px; }
+  .art .band { top: 240px; height: 300px; }
+  .hero { padding-top: 190px; }
+
+  /* Week switcher: its own row under the heading, with arrows big enough to tap (44px). */
+  .week { display: flex; align-items: center; justify-content: space-between; margin: var(--s-2) -12px 0; }
+  .week span { font: var(--t-label-l); letter-spacing: .08em; text-transform: uppercase; }
+  .wk { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+  .wk svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .days { margin-top: var(--s-1); }
+  .note-sug { margin-top: var(--s-3); }
+
+  /* Next film: one card. Title on top, the "Next" line under it, the poster peeking below.
+     The frosted top is a blurred copy of the poster (no backdrop-filter, which broke while scrolling). */
+  .next { margin: var(--s-6) 0 0; padding: var(--s-3) var(--edge) 0; border-left: 0; border-right: 0; }
+  .next::after { backdrop-filter: none; -webkit-backdrop-filter: none; -webkit-mask-image: none; mask-image: none;
+    background: linear-gradient(180deg, rgba(14,30,46,.4) 0%, transparent 40%); }
+  .next::before { inset: -24px; z-index: 0; background: inherit; filter: blur(14px);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 22%, transparent 46%); mask-image: linear-gradient(180deg, #000 0%, #000 22%, transparent 46%); }
+  .next b, .next span { position: relative; z-index: 1; left: auto; top: auto; display: block; }
+  .next span { margin-top: var(--s-1); font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+
+  /* Entering from home: the poster is already in place; everything else arrives out of a blur, in turn. */
+  .pre .top, .pre .hero > *, .pre section, .pre .next, .pre .cta { opacity: 0; filter: blur(10px); transform: translateY(14px); }
+  .enter .top, .enter .hero > *, .enter section, .enter .next, .enter .cta {
+    transition: opacity .6s ease, filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .enter .hero > :nth-child(1) { transition-delay: 0s; }
+  .enter .hero > :nth-child(2) { transition-delay: .05s; }
+  .enter .hero > :nth-child(3) { transition-delay: .1s; }
+  .enter section, .enter .next { transition-delay: .14s; }
+  .enter .cta { transition-delay: .12s; }
+  .credits { margin-top: var(--s-3); gap: var(--s-1) var(--s-2); grid-template-columns: 80px 1fr; }
+  .link { margin-top: var(--s-2); }
+  .scores span, .day small { letter-spacing: .04em; }
+
+  /* One left edge: the note and the next film line up with everything else. */
+  .note { padding: 0; }
+  .note::before { inset: -18px -22px; }
+
+  /* Times sit on the same 7-column grid as the days, two columns each. */
+  .times { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; }
+  .time { grid-column: span 2; justify-self: start; }
+
+
+  /* ---------- v11 ---------- */
+  /* Choosing eases in: the weight grows smoothly (Oswald is a variable font) and the red line draws out from the middle. */
+  .day b, .time { transition: font-weight .35s ease, color .35s ease, opacity .35s ease; }
+  .day.on::after, .time.on::after { content: none; }
+  .day::before { content: ""; position: absolute; left: 50%; bottom: 2px; width: 22px; margin-left: -11px; height: 2px; background: var(--ink);
+    transform: scaleX(0); transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+  .time::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ink);
+    transform: scaleX(0); transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+  .day.on::before, .time.on::before { transform: scaleX(1); }
+
+  /* No screenings: say so in a label, and offer the closest free slot in the same style as a time. */
+  .empty { margin-top: var(--s-4); font: inherit; color: inherit; }
+  .empty .times { margin-top: var(--s-1); }
+  .empty .time { grid-column: 1 / -1; }
+
+  /* One info line under the times: the suggestion key, or what your calendar says. */
+  .note-sug b { font-weight: 500; color: var(--ink); }
+
+  /* ---------- v12: every tap moves softly ---------- */
+  /* New times (another day, or jumping to the suggested slot) rise out of a blur instead of popping in. */
+  @keyframes soft-in { from { opacity: 0; filter: blur(4px); } }
+  .formats, .empty, #info { animation: soft-in .7s ease; }
+  .aipick .day.on::before, .aipick .time.on::before { background: var(--accent); }
+  /* Why this match: opens smoothly, out of a blur. */
+  .why { max-height: 0; opacity: 0; filter: blur(6px); transition: max-height .45s cubic-bezier(.2,.8,.2,1), opacity .4s ease, filter .4s ease; }
+  .why.open { max-height: 60px; opacity: 1; filter: none; }
+
+  /* In-app browser: IMDb, Rotten Tomatoes and Letterboxd open inside Lumen, in a sheet you close to come back. */
+  .web { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+  .web .scrim { position: absolute; inset: 0; background: rgba(6,14,22,.45); opacity: 0; transition: opacity .4s ease; }
+  .web .sheet { position: absolute; left: 0; right: 0; top: 44px; bottom: 0; border-radius: 22px 22px 0 0; overflow: hidden; background: #f4f5f6;
+    transform: translateY(100%); transition: transform .5s cubic-bezier(.2,.8,.2,1); display: flex; flex-direction: column; }
+  .web.open { pointer-events: auto; }
+  .web.open .scrim { opacity: 1; }
+  .web.open .sheet { transform: none; }
+  .web header { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; height: 56px; padding: 0 6px; background: #fff; color: #111;
+    border-bottom: 1px solid #e5e7ea; font: var(--t-ui); }
+  .web header button { width: 44px; height: 44px; display: grid; place-items: center; color: #111; font-size: 20px; }
+  .web header .addr { text-align: center; line-height: 1.25; }
+  .web header .addr b { display: block; font-weight: 500; }
+  .web header .addr small { font-size: 11px; color: #6b7280; }
+  .web .bar { height: 2px; background: var(--accent); width: 0; transition: width 1.2s ease; }
+  .web.open .bar { width: 100%; }
+  .web .page { flex: 1; padding: 28px 22px; color: #111; font: var(--t-body); }
+  .web .page h3 { font: 600 22px/1.2 var(--f-text); margin-bottom: 8px; }
+  .web .page p { color: #4b5563; }
+  .web .page .ph { margin-top: 18px; height: 12px; border-radius: 6px; background: #e5e7ea; }
+  .web .page .ph:nth-child(odd) { width: 70%; }
+
+  /* ---------- v13 ---------- */
+  /* The in-app browser takes the whole screen, like a link opened inside Instagram. */
+  .web .sheet { top: 0; border-radius: 0; background: #fff; }
+  .web header { padding-top: 40px; height: auto; min-height: 92px; }
+  .web .page { padding: 0; overflow-y: auto; font: 400 14px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+  /* Mock IMDb */
+  .imdb { background: #121212; color: #fff; min-height: 100%; }
+  .imdb .nav { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: #121212; border-bottom: 1px solid #2a2a2a; }
+  .imdb .logo { background: #f5c518; color: #000; font: 900 18px/1 Arial, sans-serif; padding: 5px 7px; border-radius: 4px; letter-spacing: -.02em; }
+  .imdb .nav i { flex: 1; height: 30px; border-radius: 4px; background: #fff; opacity: .92; }
+  .imdb .body { padding: 18px 16px; }
+  .imdb h3 { font: 400 30px/1.15 Arial, sans-serif; }
+  .imdb .sub { color: #a8a8a8; margin-top: 4px; }
+  .imdb .row { display: flex; gap: 12px; margin-top: 16px; }
+  .imdb .thumb { width: 104px; height: 154px; border-radius: 6px; background: url("posters/odyssey2.webp") center 62% / cover; flex: none; }
+  .imdb .chips span { display: inline-block; border: 1px solid #555; border-radius: 16px; padding: 2px 10px; margin: 0 6px 6px 0; font-size: 12px; }
+  .imdb .plot { margin-top: 6px; color: #ddd; font-size: 13px; }
+  .imdb .rate { display: flex; align-items: center; gap: 8px; margin-top: 18px; padding-top: 14px; border-top: 1px solid #2a2a2a; }
+  .imdb .rate small { display: block; color: #a8a8a8; font-size: 11px; letter-spacing: .08em; }
+  .imdb .star { color: #f5c518; font-size: 22px; }
+  .imdb .rate b { font-size: 18px; }
+  .imdb dl { margin-top: 14px; border-top: 1px solid #2a2a2a; }
+  .imdb dl div { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #2a2a2a; }
+  .imdb dt { font-weight: 700; } .imdb dd { color: #5799ef; }
+
+  /* Mock Rotten Tomatoes */
+  .rt { background: #fff; color: #111; min-height: 100%; }
+  .rt .nav { background: #fa320a; color: #fff; padding: 12px 16px; font: 800 16px/1 Arial, sans-serif; display: flex; align-items: center; gap: 8px; }
+  .rt .nav .tom { width: 22px; height: 22px; border-radius: 50%; background: #fff; position: relative; }
+  .rt .nav .tom::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: #fa320a; }
+  .rt .body { padding: 20px 16px; }
+  .rt h3 { font: 800 26px/1.15 Arial, sans-serif; }
+  .rt .sub { color: #505257; margin-top: 4px; }
+  .rt .meters { display: flex; gap: 14px; margin-top: 18px; }
+  .rt .meter { flex: 1; border: 1px solid #e4e4e4; border-radius: 10px; padding: 12px; display: flex; gap: 10px; align-items: center; }
+  .rt .meter i { width: 34px; height: 34px; border-radius: 50%; background: #fa320a; flex: none; }
+  .rt .meter.pop i { background: #f9d320; border-radius: 6px 6px 14px 14px; }
+  .rt .meter b { font: 800 24px/1 Arial, sans-serif; display: block; }
+  .rt .meter small { font-size: 11px; color: #505257; text-transform: uppercase; letter-spacing: .05em; }
+  .rt h4 { margin-top: 22px; font: 800 15px/1.2 Arial, sans-serif; text-transform: uppercase; }
+  .rt .cons { margin-top: 8px; color: #2a2c32; }
+  .rt .review { margin-top: 14px; padding: 12px; background: #f3f3f3; border-radius: 8px; font-size: 13px; }
+
+  /* Mock Letterboxd */
+  .lb { background: #14181c; color: #9ab; min-height: 100%; }
+  .lb .nav { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #2c3440; color: #fff; font: 700 17px/1 Georgia, serif; }
+  .lb .dots { display: flex; gap: 2px; } .lb .dots i { width: 12px; height: 12px; border-radius: 50%; }
+  .lb .dots i:nth-child(1) { background: #ff8000; } .lb .dots i:nth-child(2) { background: #00e054; } .lb .dots i:nth-child(3) { background: #40bcf4; }
+  .lb .hero { height: 150px; background: url("posters/odyssey2.webp") center 30% / cover; position: relative; }
+  .lb .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, #14181c); }
+  .lb .body { padding: 0 16px 20px; margin-top: -40px; position: relative; display: flex; gap: 14px; }
+  .lb .thumb { width: 90px; height: 134px; border-radius: 4px; box-shadow: 0 0 0 1px rgba(255,255,255,.2); background: url("posters/odyssey2.webp") center 62% / cover; flex: none; }
+  .lb h3 { color: #fff; font: 700 22px/1.2 Georgia, serif; margin-top: 44px; }
+  .lb .sub { font-size: 12px; }
+  .lb .more { padding: 0 16px; }
+  .lb .avg { display: flex; align-items: flex-end; gap: 3px; height: 50px; margin-top: 8px; }
+  .lb .avg i { flex: 1; background: #456; border-radius: 1px; }
+  .lb .rating { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #456; padding-bottom: 6px; margin-top: 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .lb .rating b { color: #fff; font: 400 26px/1 Georgia, serif; letter-spacing: 0; }
+  .lb .tag { margin-top: 14px; color: #def; font-style: italic; }
+
+  /* A chosen busy day, or a chosen busy time, is shown in full white: the line under the times already says why. */
+  .day.busy.on, .time.busy.on { opacity: 1; }
+
+  /* ---------- v14 ---------- */
+  /* No shadows hugging the text or icons: the top of the poster is darkened instead, so the white sits on it. */
+  .art .fade { background: linear-gradient(180deg, rgba(6,12,18,.5) 0%, rgba(6,12,18,.18) 14%, transparent 26%); }
+  .top .list svg { filter: none; }
+  /* Leaving for home: the page clears out of a blur, then the poster flies back into its card. */
+  .leave .top, .leave .hero > *, .leave section, .leave .next, .leave .cta { opacity: 0; filter: blur(10px); transform: translateY(10px);
+    transition: opacity .22s ease, filter .22s ease, transform .22s ease; transition-delay: 0s; }
+  /* Faster arrival. */
+  .enter .top, .enter .hero > *, .enter section, .enter .next, .enter .cta { transition-duration: .4s; }
+
+  /* Mock Rotten Tomatoes, closer to the real mobile page */
+  .rt { background: #fff; color: #2a2c32; min-height: 100%; font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif; }
+  .rt .nav { background: #fa320a; color: #fff; padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .rt .nav .brand { display: flex; align-items: center; gap: 6px; font: 700 15px/1 "Franklin Gothic Medium", Arial, sans-serif; letter-spacing: -.01em; }
+  .rt .nav .brand svg { width: 24px; height: 24px; }
+  .rt .nav .brand svg circle { fill: #fff; }
+  .rt .nav .search { flex: 1; height: 30px; border-radius: 15px; background: rgba(255,255,255,.22); margin-left: 6px; }
+  .rt .nav .burger { width: 18px; height: 12px; border-top: 2px solid #fff; border-bottom: 2px solid #fff; position: relative; }
+  .rt .nav .burger::after { content: ""; position: absolute; left: 0; right: 0; top: 3px; height: 2px; background: #fff; }
+  .rt .crumbs { padding: 10px 14px; font-size: 11px; color: #505257; border-bottom: 1px solid #e9e9e9; text-transform: uppercase; letter-spacing: .04em; }
+  .rt .head { display: flex; gap: 12px; padding: 16px 14px 0; }
+  .rt .thumb { width: 84px; height: 124px; border-radius: 4px; background: url("posters/odyssey2.webp") center 62% / cover; flex: none; }
+  .rt h3 { font: 700 24px/1.1 "Franklin Gothic Medium", Arial, sans-serif; color: #000; }
+  .rt .sub { color: #505257; margin-top: 6px; font-size: 13px; }
+  .rt .wl { margin-top: 10px; display: inline-block; border: 1px solid #2a2c32; border-radius: 4px; padding: 5px 10px; font-size: 12px; font-weight: 700; }
+  .rt .board { margin: 16px 14px 0; border: 1px solid #e9e9e9; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; }
+  .rt .score { padding: 14px 12px; text-align: center; }
+  .rt .score + .score { border-left: 1px solid #e9e9e9; }
+  .rt .score .sc-top { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0; }
+  .rt .tomato { width: 34px; height: 34px; }
+  .rt .score b { font: 700 30px/1 "Franklin Gothic Medium", Arial, sans-serif; color: #000; }
+  .rt .score small { display: block; margin-top: 6px; font-size: 12px; font-weight: 700; color: #000; }
+  .rt .score span { display: block; margin-top: 2px; font-size: 11px; color: #505257; text-decoration: underline; }
+  .rt .cert { margin: 10px 14px 0; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #000; }
+  .rt .cert i { width: 16px; height: 16px; border-radius: 50%; background: #fa320a; box-shadow: inset 0 0 0 3px #f9d320; }
+  .rt h4 { margin: 22px 14px 0; font: 700 18px/1.2 "Franklin Gothic Medium", Arial, sans-serif; color: #000; border-left: 4px solid #fa320a; padding-left: 8px; }
+  .rt .know { margin: 10px 14px 0; padding: 12px; background: #f3f3f3; border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  .rt .know b { display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #000; }
+  .rt .review { margin: 10px 14px 0; padding: 12px 0; border-bottom: 1px solid #e9e9e9; font-size: 13px; display: flex; gap: 10px; }
+  .rt .review .tomato { width: 20px; height: 20px; flex: none; }
+  .rt .review em { display: block; font-style: normal; color: #505257; font-size: 11px; margin-top: 4px; }
+
+  /* ---------- v15 ---------- */
+  /* Share sits between Trailer and the list icon, as a thin icon in the same style. */
+  .top .share { display: grid; place-items: center; }
+  .top .share svg { width: 21px; height: 21px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Next film: the glass card rises over the current film and becomes the next film page. */
+  .rise { position: absolute; z-index: 30; overflow: hidden; pointer-events: none;
+    background: linear-gradient(180deg, #4a5560 0%, #3a4652 55%, #2a3540 100%);
+    border: 1px solid rgba(255,255,255,.2); border-bottom: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 -16px 40px rgba(0,0,0,.28);
+    transition: top .6s cubic-bezier(.2,.8,.2,1), height .6s cubic-bezier(.2,.8,.2,1), border-radius .6s ease, left .6s cubic-bezier(.2,.8,.2,1), width .6s cubic-bezier(.2,.8,.2,1); }
+  .rise .p { position: absolute; left: 0; right: 0; top: 0; background-size: cover; background-position: center 20%;
+    -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%); mask-image: linear-gradient(180deg, #000 62%, transparent 100%);
+    transition: height .6s cubic-bezier(.2,.8,.2,1); }
+  .rise i { position: absolute; left: 0; right: 0; top: 0; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    -webkit-mask-image: linear-gradient(180deg, transparent 38%, #000 62%); mask-image: linear-gradient(180deg, transparent 38%, #000 62%);
+    transition: height .6s cubic-bezier(.2,.8,.2,1); }
+  /* While it rises, the film underneath clears out of a blur. */
+  .going .top, .going .hero, .going section, .going .cta { opacity: 0; filter: blur(12px); transition: opacity .4s ease, filter .4s ease; }
+  /* Arriving from the previous film: almost all at once, with only a hair of stagger so it isn't one block. */
+  .fast.enter .top, .fast.enter .hero > *, .fast.enter section, .fast.enter .next, .fast.enter .cta { transition-duration: .3s; transition-delay: 0s; }
+  .fast.enter .hero > :nth-child(2) { transition-delay: .03s; }
+  .fast.enter .hero > :nth-child(3), .fast.enter .cta { transition-delay: .06s; }
+  .fast.enter section, .fast.enter .next { transition-delay: .08s; }
+
+  /* The assistant picks a time: no line at first, then the red lines draw in under the day and time while it explains. */
+  .day::before, .time::before { transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .waiting .day::before, .waiting .time::before { transform: scaleX(0) !important; }
+  .haze { position: absolute; left: 0; right: 0; bottom: 0; height: 240px; pointer-events: none; z-index: 4; opacity: 0;
+    background: radial-gradient(70% 55% at 50% 100%, rgba(255,59,47,.42), rgba(255,80,70,.12) 55%, transparent 80%); transition: opacity .9s ease, height .9s ease; }
+  .aura { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .45s ease; z-index: 5;
+    background: linear-gradient(90deg, rgba(255,60,50,.16), transparent 5%, transparent 95%, rgba(255,60,50,.16)), linear-gradient(180deg, transparent 52%, rgba(8,12,18,.6) 80%); }
+  .speaking .aura { opacity: 1; } .speaking .haze { opacity: 1; height: 340px; }
+  .aura::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42%; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .voice { position: absolute; left: 22px; right: 22px; bottom: 120px; z-index: 6; opacity: 0; filter: blur(8px); transform: translateY(10px); pointer-events: none;
+    transition: opacity .6s ease, filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .speaking .voice { opacity: 1; filter: none; transform: none; transition-delay: .1s; }
+  .voice small { display: block; font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); margin-bottom: 6px; }
+  .voice p { font: 400 17px/1.45 var(--f-text); }
+
+  /* Voice, shared: focused side light, a slow blurred exit, the page behind dims. */
+  .aura { background: linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)), linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%) !important;
+    transition: opacity 1.1s ease !important; }
+  .aura::after { display: none !important; }
+  .haze { height: 140px !important; transition: opacity 1.1s ease !important; }
+  .speaking .haze { height: 170px !important; }
+  .voice { transition: opacity 1.1s ease, filter 1.1s ease, transform 1.1s cubic-bezier(.2,.8,.2,1) !important; }
+  .dimmable { transition: opacity .8s ease; }
+  .speaking .dimmable { opacity: .12; }
+
+  /* The voice sits on a dark, blurred floor that sets it apart. */
+  .speaking .aura { background:
+      linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)),
+      linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, transparent 50%, rgba(8,12,18,.62) 78%) !important; }
+  .aura::after { display: block !important; content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44%;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .speaking .dimmable { opacity: .35 !important; }
+  .voice { transition: opacity .85s ease, filter .85s ease, transform .85s cubic-bezier(.2,.8,.2,1) !important; }
+  .aura, .haze { transition: opacity .85s ease !important; }
+
+  /* Balanced floor (like seats): a soft dark fade and a light blur, not the whole bottom; light also at the top edge. */
+  .speaking .aura { background:
+      linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)),
+      linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, transparent 58%, rgba(8,12,18,.55) 82%) !important; }
+  .aura::after { height: 34% !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+
+  /* Your own choice is white; only the assistant's pick is red. The suggestion marker (thin red line) only on the suggested day. */
+  .day.on::before, .time.on::before { background: var(--ink) !important; }
+  .aipick .day.on::before, .aipick .time.on::before { background: var(--accent) !important; }
+  .day.on::after, .time.on::after { content: none !important; }
+  /* Busy: the date or time stays faded, but your line is full, so it reads as chosen-but-not-advised. No screenings: everything faded. */
+  .day.busy, .time.busy, .day.busy.on, .time.busy.on { opacity: 1 !important; }
+  .day.busy small, .day.busy b { opacity: .4; }
+  .time.busy { color: rgba(247,250,252,.4) !important; }
+  .day.busy.on b { opacity: .55; }
+  /* Switching days: the times update out of a short blur, without disappearing. */
+  @keyframes soft-in { from { filter: blur(5px); opacity: .55; } }
+  .formats, .empty, #info { animation: soft-in .45s ease !important; }
+  /* No flicker on load: the button changes colour only after the page is in. */
+  .cta a { transition: none; }
+  .ready .cta a { transition: background .6s ease; }
+  /* A quiet bar at the top, with the back arrow, once you scroll down. */
+  .sticky { position: absolute; left: 0; right: 0; top: 0; height: 96px; z-index: 8; display: flex; align-items: flex-end; padding: 0 12px 10px; pointer-events: none;
+    opacity: 0; transition: opacity .4s ease; background: linear-gradient(180deg, rgba(14,26,38,.55), transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
+  .sticky a { pointer-events: auto; width: 44px; height: 44px; display: grid; place-items: center; font-size: 26px; color: var(--ink); }
+  .scrolled .sticky { opacity: 1; }
+
+  /* See-through glass: less blur, so the background shows its shapes through every surface and the red button. */
+  .size, .refill, .card { backdrop-filter: blur(10px) saturate(1.3) !important; -webkit-backdrop-filter: blur(10px) saturate(1.3) !important; background: rgba(244,248,251,.08) !important; }
+  .glass, .cta a { backdrop-filter: blur(12px) saturate(1.35) !important; -webkit-backdrop-filter: blur(12px) saturate(1.35) !important; }
+  .aipick .cta, .aipick .cta a, .aiPop .size.on {
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14) !important;
+    backdrop-filter: blur(10px) saturate(1.5) !important; -webkit-backdrop-filter: blur(10px) saturate(1.5) !important; }
+
+  /* Back bar: shows as soon as you scroll, short and soft. */
+  .sticky { height: 72px !important; padding-bottom: 6px !important; background: linear-gradient(180deg, rgba(14,26,38,.35), transparent) !important;
+    backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important;
+    -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent) !important; mask-image: linear-gradient(180deg, #000 45%, transparent) !important; }
+
+  .day.on::before, .time.on::before { background: var(--ink) !important; }
+  .day.on.airec::before, .time.on.sug::before { background: var(--accent) !important; }
+  .aipick .day.on::before, .aipick .time.on::before { background: revert; }
+  #times { overflow: hidden; transition: height .38s cubic-bezier(.4,0,.2,1), opacity .2s ease; }
+  #times.swap { opacity: 0; }
+  .formats, .empty, #info { animation: none !important; }
+  .aipick div.cta { background: linear-gradient(180deg, transparent, rgba(14,38,60,.45) 45%) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+  /* The voice floor: its own layer, so its blur is right from the first frame. */
+  .aura::after { display: none !important; }
+  .vfloor { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; z-index: 5; pointer-events: none;
+    opacity: 0 !important; transition: opacity .85s ease !important; transform: none !important; filter: none !important;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .speaking .vfloor { opacity: 1 !important; }
+
+  /* The button arrives by itself, so its glass is right from the first frame. */
+  .pre .cta, .enter .cta, .leave .cta, .going .cta { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .cta a { transition: opacity .4s ease .12s, transform .4s cubic-bezier(.2,.8,.2,1) .12s, background .6s ease !important; }
+  .pre .cta a, .leave .cta a, .going .cta a { opacity: 0; transform: translateY(14px); }
+  .leave .cta a, .going .cta a { transition: opacity .22s ease, transform .22s ease !important; }
+  /* Plain glass until the assistant's lines draw in. */
+  .waiting .cta a { background: rgba(244,248,251,.12) !important; }
+  /* The voice light breathes, very slightly: a soft swell of the edges, never still, never busy. */
+  @keyframes aura-breathe { 0% { transform: none; filter: brightness(1); } 100% { transform: scale(1.03); filter: brightness(1.45); } }
+  .speaking .aura { animation: aura-breathe 3.2s ease-in-out infinite alternate; }
+  html, body { overflow-x: hidden !important; }
+  .scroll { overflow-x: hidden !important; }
+  .scroll { overscroll-behavior-x: none; touch-action: pan-y; }
+  .next { overflow: hidden; }
+  /* The voice light rises from the bottom edge too, like on the seats page. */
+  .aura::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; pointer-events: none;
+    background: radial-gradient(80% 100% at 50% 100%, rgba(255,59,47,.38), rgba(255,70,60,.1) 55%, transparent 80%); }
+  /* The rising card is the next film's own page from the first frame: its poster on top, its blurred wash below (no flat grey). */
+  .rise { background: #2a3540 !important; }
+  .rise .w { position: absolute; inset: -30%; background-size: cover; background-position: center 60%; filter: blur(70px) saturate(1.35) brightness(1.02); }
+  .rise .w::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,30,46,.4), rgba(10,24,38,.6)); }
+  .fast.enter .top, .fast.enter .hero > *, .fast.enter section, .fast.enter .next, .fast.enter .cta { transition-duration: .25s !important; transition-delay: 0s !important; }
+  /* Lumen off: no red marks, no suggestion line. */
+  html[data-lumen="off"] .day.on::before, html[data-lumen="off"] .time.on::before { background: var(--ink) !important; }
+  html[data-lumen="off"] #info { visibility: hidden; }
+</style>
+<script src="mode.js"></script>
+<script src="fullscreen.js"></script>
+<script src="fromplan.js"></script>
+</head>
+<body>
+<div class="phone">
+  <div class="bg"><div class="wash"></div><div class="shade"></div><div class="grain"></div></div>
+
+  <div class="scroll">
+    <div class="art"><div class="smear"></div><div class="poster"></div><div class="band"><i></i><i></i><i></i></div><div class="fade"></div></div>
+    <div class="top"><a class="back" href="#">‹</a><div class="right"><a class="trailer" href="#"><i>▶</i>Trailer</a><button class="share" id="share" aria-label="Share this film"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M6 12v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7"/></svg></button><button class="list saved" id="list" aria-label="In your list">
+      <svg class="add" viewBox="0 0 24 24"><path d="M4 6h11M4 12h11M4 18h7M18 15v6M15 18h6"/></svg>
+      <svg class="done" viewBox="0 0 24 24"><path d="M4 6h11M4 12h11M4 18h7M14.5 18l2.5 2.5 4.5-5"/></svg></button></div></div>
+
+    <div class="hero">
+      <h1>The<br>Odyssey</h1>
+      <p class="meta">Christopher Nolan · 2h 50m · Adventure · PG-13</p>
+      <div class="scores">
+        <a class="match" href="#" id="match"><b>94%</b><span>Match</span></a>
+        <a href="https://www.imdb.com/find/?q=The%20Odyssey" target="_blank" rel="noopener"><b>8.4</b><span>IMDb</span></a>
+        <a href="https://www.rottentomatoes.com/search?search=The%20Odyssey" target="_blank" rel="noopener"><b>91%</b><span>Tomatoes</span></a>
+        <a href="https://letterboxd.com/search/The%20Odyssey/" target="_blank" rel="noopener"><b>4.2</b><span>Letterboxd</span></a>
+      </div>
+      <p class="why" id="why">Because you rated Interstellar ★5 and saved this on Letterboxd.</p>
+    </div>
+
+    <section>
+      <h2>Pick a time</h2>
+      <div class="week"><button class="wk" aria-label="Previous week"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><span>8–14 Nov</span><button class="wk" aria-label="Next week"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+      <div class="days" id="days"></div>
+      <div id="times"></div>
+    </section>
+
+    <section class="about dimmable">
+      <h2 class="h3">About</h2>
+      <p>After the fall of Troy, Odysseus fights his way home across a hostile sea. Ten years, a hundred monsters and one stubborn god stand between him and his family, while suitors take over his house.</p>
+      <dl class="credits">
+        <dt>Director</dt><dd>Christopher Nolan</dd>
+        <dt>Cast</dt><dd>Matt Damon <span class="as">as Odysseus</span><br>Tom Holland <span class="as">as Telemachus</span><br>Anne Hathaway <span class="as">as Penelope</span><br>Zendaya <span class="as">as Athena</span><br>
+          <a class="link" href="https://www.imdb.com/find/?q=The%20Odyssey" target="_blank" rel="noopener">Full cast on <i>IMDb</i> ›</a></dd>
+      </dl>
+    </section>
+
+    <section>
+      <div class="note"><span>Your note · 2 Oct</span><p>Noa: only in IMAX, sit center. Long one, eat first.</p></div>
+    </section>
+
+    <a class="next" href="#" data-film="whalefall"><b>WHALEFALL</b><span>Next · Thriller · 1h 52m</span></a>
+  </div>
+
+  <div class="sticky"><a href="#" id="stickyBack" aria-label="Back">‹</a></div>
+  <div class="haze"></div><div class="vfloor"></div><div class="aura"></div>
+  <div class="voice" id="fvoice"><small>Lumen</small><p>Friday at 20:40 in IMAX. You go out on weekends after eight, and your calendar is free.</p></div>
+  <div class="web" id="web"><div class="scrim" data-close></div><div class="sheet">
+    <header><button data-close aria-label="Back to Lumen">✕</button><div class="addr"><b id="webName">IMDb</b><small id="webHost">imdb.com</small></div><button aria-label="More">⋯</button></header>
+    <div class="bar"></div>
+    <div class="page" id="webPage"></div>
+  </div></div>
+
+  <div class="cta"><a href="seats-design.html" id="cta"><b>Choose seats</b><span id="ctasub">Fri 13 · 20:40 IMAX ›</span></a></div>
+</div>
+
+<script>
+  const posterUrl = k => k === 'whalefall' ? 'posters/whalefall.png' : k === 'hailmary' ? 'posters/PNG/2oICmKATG5znrc6ONCJIEYrar3V.webp' : `posters/${k}.webp`;
+  const DAYS = [['Sun', 8, 'past'], ['Today', 9, ''], ['Tue', 10, 'none'], ['Wed', 11, 'busy'], ['Thu', 12, ''], ['Fri', 13, 'sug'], ['Sat', 14, '']];
+  // Each film page is filled from this data (?film=...). The calendar (BUSY, CAL) is the user's, so it stays the same.
+  const FILMS = {
+    odyssey: { formats: [['IMAX · Hall 4', ['20:40', '23:10']], ['Standard · Hall 2', ['17:30', '19:15']], ['4DX · Hall 6', ['21:00']]], sug: '13 20:40', time: '20:40' },
+    whalefall: {
+      title: 'Whale<br>fall', meta: 'Brian Duffield · 1h 52m · Thriller · PG-13', scores: ['86%', '7.4', '88%', '3.7'],
+      why: 'Because you loved Jaws and rated The Abyss ★4.',
+      about: 'A young diver goes down to find what is left of his father, and is swallowed whole by a sperm whale. He has one hour of air, and the only way out is through.',
+      director: 'Brian Duffield', next: ['verity', 'Verity', 'Next · Drama · 1h 58m'],
+      formats: [['Standard · Hall 2', ['18:00', '21:30']], ['4DX · Hall 6', ['20:15']]], sug: '13 21:30', time: '21:30',
+    },
+    verity: {
+      title: 'Verity', meta: 'Michael Showalter · 1h 58m · Drama · R', scores: ['79%', '7.0', '81%', '3.4'],
+      why: 'Because you loved Gone Girl and saved this one.',
+      about: 'A struggling writer is hired to finish the books of a famous author who can no longer write. In her house she finds a manuscript that was never meant to be read.',
+      director: 'Michael Showalter', next: ['hailmary', 'Project Hail Mary', 'Next · Sci-fi · 2h 36m'],
+      formats: [['Standard · Hall 1', ['19:00', '21:45']], ['Standard · Hall 3', ['20:30']]], sug: '13 20:30', time: '20:30',
+    },
+  };
+  const q0 = new URLSearchParams(location.search);
+  let FILM = q0.get('film') || 'odyssey', F = FILMS[FILM];
+  function fill() {
+    document.querySelector('h1').innerHTML = F.title;
+    document.querySelector('.hero .meta').textContent = F.meta;
+    document.querySelectorAll('.scores b').forEach((b, i) => b.textContent = F.scores[i]);
+    document.getElementById('why').textContent = F.why;
+    document.querySelector('.about p').textContent = F.about;
+    document.querySelector('.credits').innerHTML = `<dt>Director</dt><dd>${F.director}</dd><dt>Cast</dt><dd><a class="link" href="https://www.imdb.com/find/?q=${encodeURIComponent(F.title.replace('<br>', ''))}" target="_blank" rel="noopener">Full cast on <i>IMDb</i> ›</a></dd>`;
+    const nt = document.querySelector('.note'); if (nt) nt.closest('section').remove();
+    const nx = document.querySelector('.next');
+    nx.style.backgroundImage = `url("${posterUrl(F.next[0])}")`; nx.dataset.film = F.next[0];
+    nx.innerHTML = `<b>${F.next[1].toUpperCase()}</b><span>${F.next[2]}</span>`;
+  }
+  if (FILM !== 'odyssey') fill();
+  let FORMATS = F.formats;
+  const BUSY = { '13 23:10': 1, '11 20:40': 1, '11 23:10': 1, '11 17:30': 1, '11 19:15': 1, '11 21:00': 1, '12 17:30': 1, '12 19:15': 1 };
+  let SUG = F.sug;
+  let day = 13, time = F.time;
+  // From your calendar: why a day or a time is marked busy.
+  const CAL = { 11: 'all day', '12 17:30': 'until 19:30', '12 19:15': 'until 19:30', '13 23:10': 'until 23:30' };
+  const dayInfo = d => DAYS.find(x => x[1] === d);
+  let timesDay = null;
+
+  // Days are built once and only change class, so the choice can animate.
+  document.getElementById('days').innerHTML = DAYS.map(([n, d, s]) =>
+    `<button class="day ${s}" data-d="${d}" ${s === 'past' ? 'disabled' : ''}><small>${n}</small><b>${d}</b></button>`).join('');
+
+  function buildTimes() {
+    timesDay = day;
+    const none = dayInfo(day)[2] === 'none';
+    document.getElementById('times').innerHTML = none
+      ? `<div class="empty"><p class="label">No screenings on ${dayInfo(day)[0]} ${day}. The closest free evening:</p>
+          <div class="times"><button class="time" data-go="12 20:40">Thu 12 · 20:40</button></div></div>`
+      : `<div class="formats">${FORMATS.map(([f, ts]) => `<div class="fmt"><p class="label">${f}</p><div class="times">${ts.map(t => {
+          const k = day + ' ' + t;
+          return `<button class="time ${t === sugFor(day) ? 'sug' : ''} ${BUSY[k] ? 'busy' : ''}" data-t="${t}">${t}</button>`; }).join('')}</div></div>`).join('')}</div>
+        <p class="note-sug" id="info"></p>`;
+  }
+
+  const sugFor = d => {
+    if (d === 13) return SUG.split(' ')[1];
+    const all = FORMATS.flatMap(([, ts]) => ts).filter(t => !BUSY[d + ' ' + t]).sort();
+    return all.find(t => t >= '20:00') || all[all.length - 1];
+  };
+  // Red = the assistant's suggestion (its day, or that day's suggested time), whoever taps it. White = anything else.
+  function paint() {
+    const root = document.documentElement, sugDay = +SUG.split(' ')[0];
+    document.querySelectorAll('.day').forEach(b => b.classList.toggle('airec', +b.dataset.d === sugDay));
+    document.querySelectorAll('.time[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === time));
+    root.classList.toggle('aipick', LUMEN_MODE !== 'off' && !!time && day === sugDay && time === sugFor(day));
+  }
+  function render() {
+    document.querySelectorAll('.day').forEach(b => b.classList.toggle('on', +b.dataset.d === day));
+    if (timesDay !== day) {
+      // Switching day: the times blur, change underneath, and clear again. Nothing disappears.
+      const box = document.getElementById('times');
+      if (timesDay === null) buildTimes();
+      else {
+        const h0 = box.offsetHeight; box.style.height = h0 + 'px'; box.classList.add('swap');
+        clearTimeout(window.swapT); clearTimeout(window.swapT2);
+        window.swapT = setTimeout(() => {
+          buildTimes(); render();
+          box.style.height = 'auto'; const h1 = box.offsetHeight; box.style.height = h0 + 'px'; void box.offsetHeight;
+          box.style.height = h1 + 'px'; box.classList.remove('swap');
+          window.swapT2 = setTimeout(() => box.style.height = '', 400);
+        }, 160);
+        return;
+      }
+    }
+    document.querySelectorAll('.time[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === time));
+    const none = dayInfo(day)[2] === 'none', info = document.getElementById('info');
+    if (info) {
+      const why = CAL[day] || CAL[day + ' ' + time];
+      const next = why ? `<b>Busy</b> ${why}, by your calendar` : '<u>Suggested</u> follows your habits and preferences';
+      if (info.innerHTML !== next) { info.style.animation = 'none'; void info.offsetWidth; info.style.animation = ''; }
+      info.innerHTML = why ? `<b>Busy</b> ${why}, by your calendar` : '<u>Suggested</u> follows your habits and preferences';
+    }
+    paint();
+    const dn = dayInfo(day)[0];
+    document.getElementById('ctasub').textContent = none ? 'Pick a day ›' : !time ? 'Pick a time ›' : `${dn === 'Today' ? 'Today' : dn} ${day} · ${time} ›`;
+  }
+  const PAGES = {
+    'imdb.com': `<div class="imdb"><div class="nav"><span class="logo">IMDb</span><i></i></div><div class="body">
+      <h3>The Odyssey</h3><p class="sub">2026 · PG-13 · 2h 50m</p>
+      <div class="row"><div class="thumb"></div><div><div class="chips"><span>Action</span><span>Adventure</span><span>Epic</span></div>
+      <p class="plot">After the fall of Troy, Odysseus fights his way home across a hostile sea.</p></div></div>
+      <div class="rate"><span class="star">★</span><div><small>IMDb rating</small><b>8.4</b>/10</div></div>
+      <dl><div><dt>Director</dt><dd>Christopher Nolan</dd></div><div><dt>Stars</dt><dd>Matt Damon · Tom Holland · Anne Hathaway</dd></div></dl></div></div>`,
+    'rottentomatoes.com': `<div class="rt"><div class="nav"><span class="brand"><svg viewBox="0 0 40 40" class="tomato"><circle cx="20" cy="22" r="15" fill="#fa320a"/><path d="M14 8c3 1 5 3 6 6 1-3 3-5 6-6-2 3-3 4-6 6 2 0 5 1 7 3-3-1-5-1-7 0 0 2 0 4-1 6-1-2-1-4-1-6-2-1-4-1-7 0 2-2 5-3 7-3-3-2-4-3-4-6z" fill="#00912d"/></svg>Rotten Tomatoes</span><span class="search"></span><span class="burger"></span></div>
+      <div class="crumbs">Movies › The Odyssey</div>
+      <div class="head"><div class="thumb"></div><div><h3>The Odyssey</h3><p class="sub">PG-13, Released Jul 17, 2026, 2h 50m<br>Adventure, Action</p><span class="wl">+ Watchlist</span></div></div>
+      <div class="board"><div class="score"><div class="sc-top"><svg viewBox="0 0 40 40" class="tomato"><circle cx="20" cy="22" r="15" fill="#fa320a"/><path d="M14 8c3 1 5 3 6 6 1-3 3-5 6-6-2 3-3 4-6 6 2 0 5 1 7 3-3-1-5-1-7 0 0 2 0 4-1 6-1-2-1-4-1-6-2-1-4-1-7 0 2-2 5-3 7-3-3-2-4-3-4-6z" fill="#00912d"/></svg><b>91%</b></div><small>Tomatometer</small><span>412 Reviews</span></div>
+        <div class="score"><div class="sc-top"><svg viewBox="0 0 40 40" class="tomato"><path d="M9 16h22l-3 20H12z" fill="#fa320a"/><path d="M14 16l1 20M20 16v20M26 16l-1 20" stroke="#fff" stroke-width="2.4"/><circle cx="12" cy="13" r="5" fill="#f9d320"/><circle cx="20" cy="10" r="6" fill="#f9d320"/><circle cx="28" cy="13" r="5" fill="#f9d320"/></svg><b>88%</b></div><small>Popcornmeter</small><span>10,000+ Verified Ratings</span></div></div>
+      <p class="cert"><i></i>Certified Fresh</p>
+      <h4>What to know</h4>
+      <div class="know"><b>Critics Consensus</b>A towering, sea-soaked epic that makes an ancient journey feel urgent again.</div>
+      <h4>Critics reviews</h4>
+      <div class="review"><svg viewBox="0 0 40 40" class="tomato"><circle cx="20" cy="22" r="15" fill="#fa320a"/><path d="M14 8c3 1 5 3 6 6 1-3 3-5 6-6-2 3-3 4-6 6 2 0 5 1 7 3-3-1-5-1-7 0 0 2 0 4-1 6-1-2-1-4-1-6-2-1-4-1-7 0 2-2 5-3 7-3-3-2-4-3-4-6z" fill="#00912d"/></svg><div>Nolan finds the human ache inside the myth.<em>Top critic · The Guardian</em></div></div>
+      <div class="review"><svg viewBox="0 0 40 40" class="tomato"><circle cx="20" cy="22" r="15" fill="#fa320a"/><path d="M14 8c3 1 5 3 6 6 1-3 3-5 6-6-2 3-3 4-6 6 2 0 5 1 7 3-3-1-5-1-7 0 0 2 0 4-1 6-1-2-1-4-1-6-2-1-4-1-7 0 2-2 5-3 7-3-3-2-4-3-4-6z" fill="#00912d"/></svg><div>Big, loud and surprisingly tender.<em>Top critic · Variety</em></div></div></div>`,
+    'letterboxd.com': `<div class="lb"><div class="nav"><span class="dots"><i></i><i></i><i></i></span>Letterboxd</div><div class="hero"></div>
+      <div class="body"><div class="thumb"></div><div><h3>The Odyssey <span class="sub">2026</span></h3><p class="sub">Directed by Christopher Nolan</p></div></div>
+      <div class="more"><p class="tag">The journey home is the longest.</p>
+      <div class="rating">Ratings <b>4.2</b></div><div class="avg">${[2,3,5,8,14,22,30,38,26,12].map(h => `<i style="height:${h * 1.3}px"></i>`).join('')}</div></div></div>`,
+  };
+  const SITES = { 'imdb.com': 'IMDb', 'rottentomatoes.com': 'Rotten Tomatoes', 'letterboxd.com': 'Letterboxd' };
+  const POS = { whalefall: 'center 20%', verity: 'center 25%', odyssey2: 'center 62%', hailmary: 'center 30%' };
+  let going = false;
+  function goNext() {
+    if (going || !FILMS[document.querySelector('.next').dataset.film]) return; going = true;
+    const nx = document.querySelector('.next'), ph = document.querySelector('.phone');
+    const r = nx.getBoundingClientRect(), p = ph.getBoundingClientRect(), film = nx.dataset.film;
+    const rise = document.createElement('div');
+    rise.className = 'rise';
+    rise.innerHTML = `<div class="w" style="background-image:url('${posterUrl(film)}')"></div><div class="p" style="background-image:url('${posterUrl(film)}')"></div><i></i>`;
+    Object.assign(rise.style, { left: r.left - p.left + 'px', top: r.top - p.top + 'px', width: r.width + 'px', height: (p.bottom - r.top) + 'px', borderRadius: '32px 32px 0 0' });
+    rise.querySelector('.p').style.height = rise.querySelector('i').style.height = r.height + 'px';
+    ph.appendChild(rise);
+    document.documentElement.classList.add('going');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      Object.assign(rise.style, { left: '0px', top: '0px', width: p.width + 'px', height: p.height + 'px', borderRadius: '0px' });
+      rise.querySelector('.p').style.height = rise.querySelector('i').style.height = '450px';
+    }));
+    setTimeout(() => {
+      const root = document.documentElement;
+      FILM = film; F = FILMS[film]; fill();
+      FORMATS = F.formats; SUG = F.sug; time = F.time; day = 13; timesDay = null;
+      root.style.setProperty('--poster', `url("${posterUrl(film)}")`);
+      root.style.setProperty('--pos', POS[film] || 'center 20%');
+      history.replaceState(null, '', `film-design.html?film=${film}&poster=${film}&pos=${encodeURIComponent(POS[film] || 'center 20%')}`);
+      document.querySelector('.scroll').scrollTop = 0;
+      render();
+      root.classList.remove('going', 'enter'); root.classList.add('pre', 'fast');
+      requestAnimationFrame(() => requestAnimationFrame(() => { root.classList.add('enter'); root.classList.remove('pre'); }));
+      rise.style.transition = 'opacity .35s ease .05s'; rise.style.opacity = 0;
+      setTimeout(() => { rise.remove(); going = false; }, 300);
+    }, 330);
+  }
+  // Scrolling on past the bottom also rises into the next film.
+  let pull = 0;
+  document.querySelector('.scroll').addEventListener('wheel', e => {
+    const sc = e.currentTarget;
+    clearTimeout(window.pullT); window.pullT = setTimeout(() => pull = 0, 350);
+    if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2 && e.deltaY > 0) { pull += e.deltaY; if (pull > 600) goNext(); }
+    else pull = 0;
+  }, { passive: true });
+  { const sc = document.querySelector('.scroll'); let y0 = null;
+    sc.addEventListener('touchstart', e => { y0 = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2 ? e.touches[0].clientY : null; }, { passive: true });
+    sc.addEventListener('touchmove', e => { if (y0 !== null && y0 - e.touches[0].clientY > 110) { y0 = null; goNext(); } }, { passive: true });
+    sc.addEventListener('scroll', () => { if (y0 === null && sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2) y0 = undefined; }, { passive: true }); }
+  document.addEventListener('click', e => {
+    const ext = e.target.closest('a[target="_blank"]'), web = document.getElementById('web');
+    if (ext) {
+      e.preventDefault();
+      const host = new URL(ext.href).hostname.replace('www.', '');
+      document.getElementById('webName').textContent = SITES[host] || host;
+      document.getElementById('webHost').textContent = host;
+      document.getElementById('webPage').innerHTML = PAGES[host] || '';
+      document.getElementById('webPage').scrollTop = 0;
+      web.classList.remove('open'); void web.offsetWidth; web.classList.add('open');
+      return;
+    }
+    if (e.target.closest('[data-close]')) { web.classList.remove('open'); return; }
+    if (e.target.closest('.next')) { e.preventDefault(); goNext(); return; }
+    if (e.target.closest('#share')) { e.preventDefault(); if (navigator.share) navigator.share({ title: document.querySelector('h1').textContent, url: location.href }).catch(() => {}); return; }
+    const d = e.target.closest('[data-d]'), t = e.target.closest('[data-t]'), g = e.target.closest('[data-go]');
+    if (e.target.closest('#list')) { const l = document.getElementById('list'); l.classList.toggle('saved'); l.setAttribute('aria-label', l.classList.contains('saved') ? 'In your list' : 'Add to your list'); }
+    if (e.target.closest('#match')) { e.preventDefault(); document.getElementById('why').classList.toggle('open'); }
+    if (d && !d.disabled) { window.aiChoice = null; day = +d.dataset.d; if (CAL[day] === 'all day') time = null; render(); }
+    if (t) { window.aiChoice = null; time = t.dataset.t; render(); }
+    if (g) { e.preventDefault(); [day, time] = [+g.dataset.go.split(' ')[0], g.dataset.go.split(' ')[1]]; window.aiChoice = day + ' ' + time; render(); }
+  });
+  render();
+  const q = new URLSearchParams(location.search);
+  if (q.get('saved') === '0') document.getElementById('list').click();
+  if (q.get('match')) document.querySelector('#match b').textContent = q.get('match') + '%';
+  const backFromSteps = /seats-design|snacks-design|confirm-design/.test(document.referrer);
+  if (!backFromSteps && (window.parent !== window || q.get('from') === 'next')) document.documentElement.classList.add('pre');
+  if (window.parent === window) setTimeout(() => { const r = document.documentElement; if (r.classList.contains('pre')) { r.classList.add('enter'); r.classList.remove('pre'); } }, 900);
+  if (q.get('from') === 'next') document.documentElement.classList.add('fast');
+  if (q.get('from') === 'next') requestAnimationFrame(() => requestAnimationFrame(() => { document.documentElement.classList.add('enter'); document.documentElement.classList.remove('pre'); }));
+  window.addEventListener('message', e => {
+    const root = document.documentElement;
+    if (e.data === 'lumen:enter') { root.classList.add('enter'); requestAnimationFrame(() => root.classList.remove('pre')); }
+    if (e.data === 'lumen:reset' && FILM !== 'odyssey') { location.replace('film-design.html?poster=odyssey2&pos=center%2062%25'); return; }
+    if (e.data === 'lumen:reset') { root.classList.remove('enter', 'leave'); root.classList.add('pre'); document.querySelector('.scroll').scrollTop = 0; }
+  });
+  // ?shot=1: the whole page as one long screen, for exports.
+  if (q.get('shot')) document.fonts.ready.then(() => { document.body.style.display = 'block'; const ph = document.querySelector('.phone'), sc = document.querySelector('.scroll');
+    ph.style.cssText = `position:absolute;left:0;top:0;width:390px;height:${sc.scrollHeight}px;border-radius:0`; });
+  if (q.get('poster')) {
+    document.documentElement.style.setProperty('--poster', `url("${posterUrl(q.get('poster'))}")`);
+    if (q.get('pos')) document.documentElement.style.setProperty('--pos', q.get('pos'));
+  }
+  // Opened on its own (not inside home): back goes to the home page.
+  if (window.parent === window) document.querySelector('.back').addEventListener('click', e => {
+    e.preventDefault();
+    document.documentElement.classList.add('leave');
+    setTimeout(() => location.href = 'home-design.html?dir=red&font=anton&small=mono&scale=2', 200);
+  });
+  if (window.parent !== window) document.querySelector('.back').addEventListener('click', e => {
+    e.preventDefault();
+    document.documentElement.classList.add('leave');
+    setTimeout(() => parent.postMessage('lumen:back', '*'), 90);
+  });
+
+  // When the times come into view, the assistant picks: lines draw in while it speaks.
+  (() => { const root = document.documentElement, sc = document.querySelector('.scroll'), sec = document.getElementById('days');
+    if (FILM !== 'odyssey') return;
+    root.classList.add('waiting'); let done = false;
+    const go = () => { if (done) return; done = true;
+      window.aiChoice = SUG; root.classList.add('speaking', 'aipick'); setTimeout(() => root.classList.remove('waiting'), 1500);
+      setTimeout(() => root.classList.remove('speaking'), 6800); sessionStorage.setItem('lumenFilmSeen', '1'); };
+    const glide = to => { const from = sc.scrollTop, t0 = performance.now(), d = 1600;
+      const st = now => { const k = Math.min(1, (now - t0) / d), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; sc.scrollTop = from + (to - from) * e; if (k < 1) requestAnimationFrame(st); };
+      requestAnimationFrame(st); };
+    if (LUMEN_MODE === 'off') { root.classList.remove('waiting'); return; }
+    if (new URLSearchParams(location.search).get('guided') === '0' || LUMEN_MODE === 'quiet' || sessionStorage.getItem('lumenFilmSeen')) { window.aiChoice = SUG; root.classList.add('aipick'); root.classList.remove('waiting'); return; }
+    const start = () => setTimeout(() => { glide(sec.closest('section').offsetTop - 40); go(); }, 700);
+    if (window.parent !== window) window.addEventListener('message', e => { if (e.data === 'lumen:enter') start(); });
+    else start();
+    document.addEventListener('click', e => { if (root.classList.contains('speaking') && !e.target.closest('button, a')) root.classList.remove('speaking'); });
+  })();
+
+  (() => { const sc = document.querySelector('.scroll'), root = document.documentElement;
+    sc.addEventListener('scroll', () => root.classList.toggle('scrolled', sc.scrollTop > 40), { passive: true });
+    document.getElementById('stickyBack').addEventListener('click', e => { e.preventDefault(); document.querySelector('.back').click(); });
+    setTimeout(() => root.classList.add('ready'), 400); })();
+</script>
+</body>
+</html>

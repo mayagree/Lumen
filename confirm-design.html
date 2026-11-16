@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · Confirm</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Anton&family=Oswald:wght@200..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="type.css?v=3">
+<style>
+  :root { --ink: #f7fafc; --soft: rgba(244,248,251,.86); --faint: rgba(244,248,251,.55); --accent: #ff3b2f; --poster: url("posters/odyssey2.webp"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #111; color: var(--ink); font-family: var(--f-text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px; }
+  button, a { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-decoration: none; }
+  @media (max-width: 700px) { body { display: block; padding: 0; } .phone { width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; } }
+
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; overflow: clip; position: relative; background: #2a3540; isolation: isolate; }
+  .bg { position: absolute; inset: 0; z-index: -1; }
+  .bg .wash { position: absolute; inset: -30%; background: var(--poster) center 30% / cover; filter: blur(70px) saturate(1.35) brightness(1.02); }
+  .bg .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,30,46,.4) 0%, rgba(14,30,46,.45) 50%, rgba(10,24,38,.6) 100%); }
+  .bggrain { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .3; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+  .scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 150px; }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  /* Header, the same as seats and snacks. */
+  .top { display: flex; align-items: flex-start; gap: var(--s-1); padding: 58px var(--edge) 0; }
+  .back { width: 36px; height: 36px; margin-left: -10px; display: grid; place-items: center; font-size: 24px; }
+  .top .film b { display: block; font: var(--t-label-l); font-size: 15px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .top .film span { display: block; margin-top: 4px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-1); padding: var(--s-2) var(--edge) 0; }
+  .steps span { padding-top: var(--s-1); border-top: 2px solid rgba(244,248,251,.16); font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .steps span.on { border-top-color: var(--ink); color: var(--ink); }
+  .steps span.done { border-top-color: rgba(244,248,251,.55); }
+  .title { padding: var(--s-4) var(--edge) 0; }
+  .title h1 { font: var(--t-display-m); letter-spacing: .01em; text-transform: uppercase; }
+  .title p { margin-top: var(--s-1); font: var(--t-body); color: var(--soft); }
+
+  /* The evening, as one ticket. */
+  .ticket { margin: var(--s-3) var(--edge) 0; border-radius: 24px; overflow: hidden; background: rgba(244,248,251,.08);
+    backdrop-filter: blur(10px) saturate(1.3); -webkit-backdrop-filter: blur(10px) saturate(1.3); }
+  .thead { display: flex; gap: var(--s-2); padding: var(--s-2); align-items: center; }
+  .thead .pst { width: 64px; height: 92px; border-radius: 10px; flex: none; background: var(--poster) center / cover; }
+  .thead h2 { font: 400 30px/1 var(--f-display, "Anton"); text-transform: uppercase; letter-spacing: .01em; }
+  .thead span { display: block; margin-top: 6px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); padding: var(--s-2); gap: var(--s-1); border-top: 1px dashed rgba(244,248,251,.18); }
+  .facts small { display: block; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+  .facts b { display: block; margin-top: 4px; font: var(--t-number-s); letter-spacing: .025em; font-size: 22px; }
+
+  /* The bill: quiet rows, the total in big numbers. */
+  .lines { margin: var(--s-3) var(--edge) 0; }
+  .lines h3 { font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); margin-bottom: var(--s-1); }
+  .row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; font: var(--t-body); }
+  .row em { font-style: normal; font: var(--t-number-s); letter-spacing: .025em; }
+  .row span small { margin-left: 6px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+  .total { display: flex; justify-content: space-between; align-items: flex-end; margin-top: var(--s-1); padding-top: var(--s-2); border-top: 1px solid rgba(244,248,251,.16); }
+  .total span { font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+  .total b { font: 500 40px/1 "Oswald", sans-serif; letter-spacing: .01em; }
+  .pay { margin: var(--s-3) var(--edge) 0; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 20px; background: rgba(244,248,251,.08);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); width: calc(100% - 2 * var(--edge)); text-align: left; }
+  .pay b { display: block; font: 500 16px/1.2 var(--f-text); }
+  .pay span { font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .pay i { font-style: normal; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+
+  /* Pay: the assistant planned the evening, so the button carries its red. */
+  .actions { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; padding: 30px var(--edge) 34px;
+    background: linear-gradient(180deg, transparent, rgba(14,38,60,.45) 45%); }
+  .cta { width: 100%; height: 60px; border-radius: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14);
+    backdrop-filter: blur(10px) saturate(1.5); -webkit-backdrop-filter: blur(10px) saturate(1.5);
+    transition: opacity .55s ease .3s, transform .55s cubic-bezier(.2,.8,.2,1) .3s; }
+  .cta b { font: var(--t-button); }
+  .cta span { font: var(--t-number-s); letter-spacing: .025em; }
+  .cta .dots { display: none; gap: 5px; }
+  .cta .dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); animation: think 1s ease-in-out infinite; }
+  .cta .dots i:nth-child(2) { animation-delay: .15s; } .cta .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes think { 50% { opacity: .25; } }
+  .paying .cta .dots { display: flex; }
+  .paying .cta span { display: none; }
+
+  /* Arrival: out of a blur, in turn (the button by itself, so its glass is right from the first frame). */
+  .reveal .scroll > * { opacity: 0; filter: blur(10px); transform: translateY(10px); }
+  .reveal .cta { opacity: 0; transform: translateY(10px); }
+  .revealed .scroll > * { opacity: 1; filter: none; transform: none; transition: opacity .55s ease, filter .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+  .revealed .steps { transition-delay: .04s; } .revealed .title { transition-delay: .08s; } .revealed .ticket { transition-delay: .14s; }
+  .revealed .lines { transition-delay: .2s; } .revealed .pay { transition-delay: .26s; }
+
+  /* Paid: the page clears out of a blur, and the evening comes back as one ticket. */
+  .scroll, .actions { transition: opacity .6s ease, filter .6s ease; }
+  .done .scroll, .done .actions { opacity: 0; filter: blur(14px); pointer-events: none; }
+  .set { position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; padding: 96px var(--edge) 40px; pointer-events: none; }
+  .done .set { pointer-events: auto; }
+  .set > * { opacity: 0; filter: blur(12px); transform: translateY(14px); transition: opacity .9s ease, filter .9s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+  .done .set > * { opacity: 1; filter: none; transform: none; }
+  .done .set > :nth-child(1) { transition-delay: .5s; } .done .set > :nth-child(2) { transition-delay: .75s; }
+  .done .set > :nth-child(3) { transition-delay: 1.1s; } .done .set > :nth-child(4) { transition-delay: 1.5s; }
+  .set small { font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+  .set h1 { margin-top: var(--s-1); font: 400 64px/.95 "Anton", sans-serif; text-transform: uppercase; letter-spacing: .01em; }
+  .set h1 em { font-style: normal; }
+  .pass { margin-top: var(--s-4); border-radius: 26px; overflow: hidden; background: rgba(244,248,251,.1);
+    backdrop-filter: blur(12px) saturate(1.3); -webkit-backdrop-filter: blur(12px) saturate(1.3); }
+  .pass .facts { border-top: 0; }
+  .pass .code { display: flex; gap: var(--s-2); align-items: center; padding: var(--s-2); border-top: 1px dashed rgba(244,248,251,.18); }
+  .pass .qr { width: 92px; height: 92px; border-radius: 12px; background: #f4f8fb; padding: 8px; flex: none; }
+  .pass .qr svg { width: 100%; height: 100%; display: block; }
+  .pass .code p { font: var(--t-body); color: var(--soft); }
+  .pass .code p b { display: block; color: var(--ink); font: var(--t-label-l); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .set .home { margin-top: auto; height: 56px; border-radius: 28px; display: grid; place-items: center; background: rgba(244,248,251,.1);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); font: var(--t-button); }
+
+  /* The celebration: the assistant's light breathes once around the whole screen, then rests. */
+  .glow { position: absolute; inset: 0; z-index: 9; pointer-events: none; opacity: 0;
+    background:
+      linear-gradient(90deg, rgba(255,60,50,.34), transparent 5%, transparent 95%, rgba(255,60,50,.34)),
+      linear-gradient(0deg, rgba(255,60,50,.26), transparent 7%),
+      linear-gradient(180deg, rgba(255,60,50,.26), transparent 7%); }
+  .done .glow { animation: breathe 3.2s ease .3s forwards; }
+  @keyframes breathe { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: .22; } }
+  .done .bg .wash { animation: warm 3.2s ease .3s forwards; }
+  @keyframes warm { 40% { filter: blur(70px) saturate(1.6) brightness(1.12); } 100% { filter: blur(70px) saturate(1.35) brightness(1.02); } }
+
+  /* The button is there from the start, with the page. */
+  .reveal .cta { opacity: 1 !important; transform: none !important; }
+  .cta { transition: background .5s ease !important; }
+  /* Look A2: the next step is plain glass; the red moves to the title. */
+  .glassbtn .cta { background: rgba(244,248,251,.12); }
+  .redtitle .title h1 { color: var(--accent); }
+
+  /* Look B: the poster fills the top, like the film page; the film and its facts sit on it. */
+  .hero { display: none; }
+  .poster .hero { display: block; position: relative; margin-top: -132px; height: 470px; }
+  .poster .hero .img { position: absolute; inset: 0; background: var(--poster) center 38% / cover;
+    -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, transparent 100%); }
+  .poster .hero .fog { position: absolute; left: 0; right: 0; bottom: 0; height: 58%;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .poster .hero .on { position: absolute; left: var(--edge); right: var(--edge); bottom: 0; }
+  .poster .hero h2 { font: 400 56px/.92 "Anton", sans-serif; text-transform: uppercase; letter-spacing: .01em; }
+  .poster .hero .facts { padding: var(--s-2) 0 0; border-top: 0; }
+  .poster .top, .poster .steps { position: relative; z-index: 2; }
+  .poster .scroll::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 170px; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(10,20,30,.55), transparent); }
+  .poster .title, .poster .ticket { display: none; }
+
+  /* Paid: the poster again, the film's name big in red, and a ticket stub with a barcode. */
+  .set { padding: 0 !important; }
+  .set .shot { position: absolute; inset: 0; background: var(--poster) center 38% / cover; z-index: -1; }
+  .set .shot::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 66%;
+    background: linear-gradient(180deg, transparent, rgba(10,20,30,.55) 50%);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%); mask-image: linear-gradient(180deg, transparent, #000 40%); }
+  .set .body { margin-top: auto; padding: 0 var(--edge) 34px; display: flex; flex-direction: column; }
+  .set .body > * { opacity: 0; filter: blur(12px); transform: translateY(14px); transition: opacity .9s ease, filter .9s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+  .done .set .body > * { opacity: 1; filter: none; transform: none; }
+  .done .set .body > :nth-child(1) { transition-delay: .5s; } .done .set .body > :nth-child(2) { transition-delay: .7s; }
+  .done .set .body > :nth-child(3) { transition-delay: 1s; } .done .set .body > :nth-child(4) { transition-delay: 1.3s; } .done .set .body > :nth-child(5) { transition-delay: 1.6s; }
+  .set .shot { opacity: 0; transform: scale(1.06); transition: opacity 1.2s ease .2s, transform 2.4s cubic-bezier(.2,.8,.2,1) .2s; }
+  .done .set .shot { opacity: 1; transform: none; }
+  .set > :not(.shot):not(.body) { display: none; }
+  .set h1 { margin-top: var(--s-1); font: 400 76px/.9 "Anton", sans-serif !important; color: var(--accent); }
+  .set .facts { padding: var(--s-2) 0 0; border-top: 0; }
+  .stub { margin-top: var(--s-3); display: flex; align-items: center; gap: var(--s-2); padding: 14px 18px; border-radius: 18px; background: rgba(247,250,252,.94); color: #0e1a26; }
+  .stub svg { height: 46px; flex: 1; display: block; }
+  .stub p { font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: rgba(14,26,38,.7); white-space: nowrap; }
+  .stub p b { display: block; color: #0e1a26; font-size: 13px; }
+  .set .note { margin-top: var(--s-2); font: var(--t-body); color: var(--soft); }
+  .set .home { margin-top: var(--s-3); }
+
+  /* Look C (default): a calm, practical summary. The card, a modest total, and the card you pay with always in sight. */
+  .calm .total b { font: 500 26px/1 "Oswald", sans-serif; }
+  .calm .lines { margin-top: var(--s-3); }
+  .calm .title { padding-top: var(--s-3); }
+  .calm .ticket { margin-top: var(--s-2); }
+  .calm .row { padding: 7px 0; }
+  .calm .thead .pst { width: 52px; height: 74px; }
+  .calm .scroll { padding-bottom: 200px; }
+  .calm .actions .pay { margin: 0 0 10px; width: 100%; padding: 10px 16px; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .calm .actions .pay b { font-size: 14px; }
+
+  /* C, refined: the film in red on the card, no Order heading, one number style with the total heavier. */
+  .calm .lines h3 { display: none; }
+  .calm .row em { font-weight: 300; }
+  .calm .total { align-items: baseline; }
+  .calm .total b { font: var(--t-number-s); letter-spacing: .025em; font-weight: 500; }
+  .calm .total span { font: var(--t-body); color: var(--ink); letter-spacing: 0; text-transform: none; }
+  .calm .pay { margin-top: var(--s-2); }
+  /* A smaller step title, to try. */
+  .smallhdr .title h1 { font-size: 30px; line-height: 1; }
+
+  /* One fold: no scrolling when it all fits. */
+  .calm .scroll { padding-bottom: 100px; overscroll-behavior: none; }
+  .night-a .set .shot::after { height: 42% !important; }
+
+  /* Paying: a soft red light drifts through the button while it thinks. */
+  .cta { position: relative; overflow: hidden; isolation: isolate; }
+  .cta .dots { display: none !important; }
+  .paying .cta span { display: inline !important; }
+  .cta::after { content: ""; position: absolute; top: -30%; bottom: -30%; left: 0; width: 55%; z-index: -1; pointer-events: none; opacity: 0;
+    background: radial-gradient(closest-side, rgba(255,110,95,.75), rgba(255,59,47,.25) 60%, transparent); filter: blur(10px); transform: translateX(-100%); transition: opacity .5s ease; }
+  .paying .cta::after { opacity: 1; animation: think-sweep 1.6s cubic-bezier(.45,0,.55,1) infinite alternate; }
+  @keyframes think-sweep { from { transform: translateX(-60%); } to { transform: translateX(240%); } }
+
+  /* My night: no way back to the booking; white bars straight on the blur; soft edges without a sharp line. */
+  .set .shot::after { left: -40px !important; right: -40px !important; }
+  .stub { background: none !important; padding: 0 !important; color: var(--ink) !important; }
+  .stub svg g { fill: var(--ink); }
+  .stub p { color: var(--soft) !important; } .stub p b { color: var(--ink) !important; }
+  .set .body { padding-bottom: 44px !important; }
+  /* A: the poster raised, so the whirlpool shows above the details. */
+  .night-a .set .shot { top: -210px; bottom: 210px; background-size: cover; background-position: center top; }
+  .night-a.done .set { background: #0f1c28; }
+  /* B: the name and details at the top over the sky, the whirlpool free in the middle, the barcode alone at the bottom. */
+  .night-b .set .body { margin-top: 0; height: 100%; padding-top: 72px !important; }
+  .night-b .set .shot { background-position: center 62%; }
+  .night-b .set .shot::after { height: 30% !important; }
+  .night-b .set .shot::before { content: ""; position: absolute; left: -40px; right: -40px; top: 0; height: 48%;
+    background: linear-gradient(180deg, rgba(10,20,30,.35), transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent); mask-image: linear-gradient(180deg, #000 45%, transparent); }
+  .night-b .stub { margin-top: auto; }
+
+  .facts.four { grid-template-columns: 1.1fr 1fr .6fr 1fr; }
+  .row .note { display: block; margin-top: 2px; font-style: normal; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--faint); }
+  /* Paying: no glow; the button's own frost slowly breathes, deeper and back, while it thinks. */
+  .paying .cta::after { animation: none !important; opacity: 0 !important; }
+  .paying .cta { animation: pay-breathe 1.5s ease-in-out infinite alternate; }
+  @keyframes pay-breathe {
+    from { backdrop-filter: blur(10px) saturate(1.5); -webkit-backdrop-filter: blur(10px) saturate(1.5); background-position: 0 0; }
+    to { backdrop-filter: blur(28px) saturate(1.15) brightness(1.08); -webkit-backdrop-filter: blur(28px) saturate(1.15) brightness(1.08); } }
+  .paying .cta b, .paying .cta span { animation: pay-text 1.5s ease-in-out infinite alternate; }
+  @keyframes pay-text { to { opacity: .55; filter: blur(.6px); } }
+  @media (max-height: 800px) { .calm .title { padding-top: var(--s-2); } .calm .row { padding: 5px 0; } .calm .total { padding-top: 10px; } .calm .pay { margin-top: 12px; } }
+  /* My night: a chevron down, it tucks away (the ticket stays), it doesn't close or go back. */
+  .set > .down { display: grid !important; position: absolute; top: 50px; left: calc(var(--edge) - 8px); z-index: 2; width: 44px; height: 44px; place-items: center;
+    opacity: 0; transition: opacity .8s ease 1.8s; }
+  .done .set > .down { opacity: 1; }
+  .down svg { width: 18px; height: 12px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .night-b .set .body { padding-top: 104px !important; }
+  /* A, refined: the poster raised and faded into the sea's own colour (no hard edge), shifted so the boat stays in. */
+  .night-a .set .shot { top: -200px !important; bottom: auto !important; height: 812px; background-size: cover !important; background-position: 62% top !important;
+    -webkit-mask-image: linear-gradient(180deg, #000 58%, transparent 84%); mask-image: linear-gradient(180deg, #000 58%, transparent 84%); }
+  .night-a.done .set { background: #1b2736 !important; }
+  .night-a .set .shot::after { display: none; }
+  .night-a .set .body { position: relative; }
+  .night-a .set .body::before { content: ""; position: absolute; left: -40px; right: -40px; top: -90px; bottom: 0; z-index: -1;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: linear-gradient(180deg, transparent, rgba(16,26,38,.5) 40%);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 35%); mask-image: linear-gradient(180deg, transparent, #000 35%); }
+  .set h1 { margin-top: 0 !important; }
+  /* B, refined: more air between the name, the details and the poster. */
+  .night-b .set .facts { margin-top: var(--s-2); }
+  .night-b .set .body { padding-top: 112px !important; }
+  /* Reopened from home: it simply rises into place, no celebration. */
+  .reopen .glow, .reopen.done .glow { animation: none !important; opacity: 0 !important; }
+  .reopen .set, .reopen .set * { transition-delay: 0s !important; }
+  .reopen .set { animation: rise .55s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes rise { from { transform: translateY(60px); opacity: 0; } }
+  .reopen .scroll, .reopen .actions { display: none; }
+  .tuck .set { transform: translateY(80px); opacity: 0; transition: transform .42s cubic-bezier(.4,0,.6,1), opacity .42s ease; }
+  /* Paying, stronger: a bright red frost swells inside the glass and settles, again and again; the words stay crisp on top. */
+  .paying .cta, .paying .cta b, .paying .cta span { animation: none !important; }
+  .cta b, .cta span { position: relative; z-index: 2; }
+  .paying .cta::after { opacity: 1 !important; left: 50% !important; width: 140% !important; top: -60% !important; bottom: -60% !important; z-index: 1 !important;
+    background: radial-gradient(closest-side, rgba(255,120,105,.85), rgba(255,59,47,.35) 55%, transparent) !important; filter: blur(14px) !important;
+    animation: pay-swell 1.4s cubic-bezier(.45,0,.55,1) infinite alternate !important; }
+  @keyframes pay-swell { from { transform: translateX(-50%) scale(.25, .6); opacity: .35; } to { transform: translateX(-50%) scale(1, 1); opacity: 1; } }
+  /* Split with friends: no names, just how many and a link. */
+  .actions { display: grid; gap: 4px; }
+  .splitlink { height: 36px; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+  .calm .scroll { padding-bottom: 130px !important; }
+  .split { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 11; padding: 22px 20px 20px; border-radius: 30px;
+    background: rgba(244,248,251,.1); backdrop-filter: blur(28px) saturate(1.2) brightness(.85); -webkit-backdrop-filter: blur(28px) saturate(1.2) brightness(.85);
+    transform: translateY(110%); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .splitOn .split { transform: none; }
+  .splitOn .actions { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  .split .shead { display: flex; justify-content: space-between; align-items: center; }
+  .split .shead b { font: 500 17px/1.2 var(--f-text); }
+  .sx { width: 36px; height: 36px; border-radius: 50%; background: rgba(244,248,251,.12); display: grid; place-items: center; }
+  .sx svg { width: 12px; height: 12px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
+  .snote { margin-top: 6px; font: 400 13px/1.4 var(--f-text); color: var(--soft); }
+  .ways, .each { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-top: 1px solid rgba(244,248,251,.1); font: 400 15px/1 var(--f-text); }
+  .ways { margin-top: var(--s-2); }
+  .step { display: flex; align-items: center; gap: 14px; }
+  .step button { width: 34px; height: 34px; border-radius: 50%; background: rgba(244,248,251,.12); font-size: 18px; }
+  .step b, .each b { font: var(--t-number-s); font-size: 22px; min-width: 18px; text-align: center; }
+  .share { width: 100%; height: 56px; margin-top: var(--s-2); border-radius: 28px; display: flex; align-items: center; justify-content: center; gap: 10px; background: rgba(244,248,251,.16); font: var(--t-button); }
+  .share svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .actions { padding-bottom: 12px !important; gap: 0 !important; }
+  .splitlink { height: 32px; }
+</style>
+<script src="fullscreen.js"></script>
+</head>
+<body>
+<div class="phone reveal" id="phone">
+  <div class="bggrain"></div><div class="bg"><div class="wash"></div><div class="shade"></div></div>
+  <div class="scroll">
+    <div class="top"><a class="back" href="snacks-design.html">‹</a></div>
+    <div class="steps"><span class="done">1 · Seats</span><span class="done">2 · Snacks</span><span class="on">3 · Confirm</span></div>
+    <div class="hero"><div class="img"></div><div class="fog"></div><div class="on"><h2>The<br>Odyssey</h2>
+      <div class="facts"><div><small>Fri 13 Nov</small><b>20:40</b></div><div><small>IMAX · Hall 4</small><b>2h 50m</b></div><div><small>Seats</small><b>F6 F7</b></div></div></div></div>
+    <div class="title"><h1>Confirm</h1></div>
+
+    <div class="ticket">
+      <div class="thead"><div class="pst"></div><div><h2>The Odyssey</h2><span>IMAX · 2h 50m</span></div></div>
+      <div class="facts four"><div><small>Date</small><b>Fri 13</b></div><div><small>Time</small><b>20:40</b></div><div><small>Hall</small><b>4</b></div><div><small>Seats</small><b>F6 F7</b></div></div>
+    </div>
+
+    <div class="lines">
+      <h3>Order</h3>
+      <div id="rows"></div>
+      <div class="total"><span>Total</span><b id="sum">₪0</b></div>
+    </div>
+
+    <button class="pay"><div><b>Visa ·· 4821</b><span>Your usual card</span></div><i>Change</i></button>
+  </div>
+  <div class="actions"><button class="cta" id="cta"><b>Pay</b><span id="payN">₪0</span><em class="dots"><i></i><i></i><i></i></em></button>
+    <button class="splitlink" id="splitOpen">Split with friends</button></div>
+  <div class="split" id="split">
+    <div class="shead"><b>Split the bill</b><button class="sx" id="splitX" aria-label="Close"><svg viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8"/></svg></button></div>
+    <p class="snote">Send one link. Each friend pays their part, and the seats stay held for 10 minutes.</p>
+    <div class="ways"><span>Split between</span><div class="step"><button id="wLess" aria-label="Fewer">−</button><b id="wN">2</b><button id="wMore" aria-label="More">+</button></div></div>
+    <div class="each"><span>Each pays</span><b id="wEach">₪0</b></div>
+    <button class="share" id="shareBtn"><svg viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span id="shareText">Share a pay link</span></button>
+  </div>
+
+  <div class="set" aria-live="polite">
+    <div class="shot"></div>
+    <a class="down" href="home-design.html" aria-label="Minimize"><svg viewBox="0 0 16 10"><path d="M2 2l6 6 6-6"/></svg></a>
+    <div class="body">
+      <small>Lumen · You're set</small>
+      <h1>The<br>Odyssey</h1>
+      <div class="facts four"><div><small>Date</small><b>Fri 13</b></div><div><small>Time</small><b>20:40</b></div><div><small>Hall</small><b>4</b></div><div><small>Seats</small><b>F6 F7</b></div></div>
+      <div class="stub"><svg viewBox="0 0 200 46" preserveAspectRatio="none" id="bars"></svg><p><b>Entry from 20:10</b>Scan at the entrance</p></div>
+    </div>
+  </div>
+  <div class="glow"></div>
+</div>
+
+<script>
+  const phone = document.getElementById('phone');
+  const look = new URLSearchParams(location.search).get('look') || 'c';
+  if (look === 'c') { phone.classList.add('calm'); }
+  if (new URLSearchParams(location.search).get('hdr') === 's') phone.classList.add('smallhdr');
+  if (look === 'a2') phone.classList.add('glassbtn', 'redtitle');
+  if (look === 'b') phone.classList.add('poster', 'glassbtn');
+  const night = new URLSearchParams(location.search).get('night') || 'a';
+  if (new URLSearchParams(location.search).get('label') !== '1') document.querySelector('.set .body small').remove();
+  phone.classList.add('night-' + night);
+  // Once paid, this is your night: back no longer leads to the booking.
+  const lockBack = () => { history.pushState({ night: 1 }, ''); addEventListener('popstate', () => history.pushState({ night: 1 }, '')); };
+  const fromHome = new URLSearchParams(location.search).get('from') === 'home';
+  if (fromHome) phone.classList.add('reopen');
+  new MutationObserver(() => { if (!fromHome && phone.classList.contains('done') && !phone._locked) { phone._locked = 1; lockBack(); } }).observe(phone, { attributes: true, attributeFilter: ['class'] });
+  if (new URLSearchParams(location.search).get('paid')) { if (fromHome) phone.classList.add('done'); else setTimeout(() => phone.classList.add('done'), 300); }
+  document.querySelector('.down').addEventListener('click', e => { e.preventDefault(); phone.classList.add('tuck'); setTimeout(() => location.href = 'home-design.html', 420); });
+  const TICKET = 38;
+  let order = { lines: [], total: 0 };
+  try { order = JSON.parse(sessionStorage.getItem('lumenOrder')) || order; } catch (e) {}
+  if (!order.lines.length && !sessionStorage.getItem('lumenOrder')) order = { lines: [['Popcorn L', 1, 34], ['Refill at the break', 1, 12]], total: 46 };
+
+  const rows = [['Tickets', 2, TICKET * 2, 'Student card applied'], ...order.lines];
+  document.getElementById('rows').innerHTML = rows.map(([name, n, p, note]) =>
+    `<div class="row"><span>${name}${n > 1 ? `<small>× ${n}</small>` : ''}${note ? `<i class="note">${note}</i>` : ''}</span><em>₪${p}</em></div>`).join('');
+  const sum = TICKET * 2 + order.total;
+  document.getElementById('sum').textContent = '₪' + sum;
+  document.getElementById('payN').textContent = '₪' + sum;
+  const snacksNote = order.lines.length ? ' Your snacks wait at counter 2.' : '';
+
+  // A made-up code pattern, drawn once.
+  let seed = 7, q = '';
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const finder = (x, y) => `<path d="M${x} ${y}h7v7h-7z M${x + 1} ${y + 1}v5h5v-5z M${x + 2} ${y + 2}h3v3h-3z" fill-rule="evenodd"/>`;
+  for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
+    const inF = (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
+    if (!inF && rnd() > .5) q += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  }
+  0 && (document.getElementById('qr').innerHTML = `<g fill="#0e1a26">${finder(0, 0)}${finder(14, 0)}${finder(0, 14)}${q}</g>`);
+
+  document.getElementById('cta').addEventListener('click', () => {
+    if (phone.classList.contains('paying')) return;
+    phone.classList.add('paying');
+    setTimeout(() => { sessionStorage.setItem('lumenBooked', '1'); location.replace('my-night-design.html?celebrate=1'); }, 1600);
+  });
+
+  document.fonts.ready.then(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => phone.classList.add('revealed')));
+    setTimeout(() => phone.classList.remove('reveal', 'revealed'), 900);
+  });
+  { let x = 0, r = '', k = 11; const R = () => (k = (k * 9301 + 49297) % 233280) / 233280;
+    while (x < 196) { const w = R() < .5 ? 1.5 : R() < .7 ? 3 : 4.5; r += `<rect x="${x.toFixed(1)}" y="0" width="${w}" height="46"/>`; x += w + (R() < .6 ? 2 : 3.5); }
+    document.getElementById('bars').innerHTML = `<g>${r}</g>`; }
+  if (new URLSearchParams(location.search).get('cols') === '3') document.querySelectorAll('.facts.four').forEach(f => {
+    f.classList.remove('four'); f.innerHTML = '<div><small>Fri 13 Nov</small><b>20:40</b></div><div><small>Hall</small><b>4</b></div><div><small>Seats</small><b>F6 F7</b></div>'; });
+  // Split: how many, each one's part, one link to share; then you pay your own part.
+  { let n = 2; const total = () => +document.getElementById('payN').textContent.replace(/\D/g, '');
+    const upd = () => { document.getElementById('wN').textContent = n; document.getElementById('wEach').textContent = '₪' + Math.ceil(total() / n); };
+    document.getElementById('splitOpen').addEventListener('click', () => { upd(); phone.classList.add('splitOn'); });
+    document.getElementById('splitX').addEventListener('click', () => phone.classList.remove('splitOn'));
+    document.getElementById('wLess').addEventListener('click', () => { n = Math.max(2, n - 1); upd(); });
+    document.getElementById('wMore').addEventListener('click', () => { n = Math.min(8, n + 1); upd(); });
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      const url = location.origin + '/prototype/my-night-design.html';
+      try { if (navigator.share) await navigator.share({ title: 'Lumen', text: 'Pay your part for tonight', url }); else await navigator.clipboard.writeText(url); } catch (er) {}
+      document.getElementById('shareText').textContent = 'Link sent';
+      setTimeout(() => { phone.classList.remove('splitOn'); document.getElementById('payN').textContent = '₪' + Math.ceil(total() / n);
+        document.querySelector('#cta b').textContent = 'Pay your part'; document.getElementById('splitOpen').style.visibility = 'hidden'; }, 900); }); }
+</script>
+</body>
+</html>

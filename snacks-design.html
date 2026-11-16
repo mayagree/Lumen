@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · Snacks</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Anton&family=Oswald:wght@200..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="type.css?v=3">
+<style>
+  :root { --ink: #f7fafc; --soft: rgba(244,248,251,.86); --accent: #ff3b2f; --poster: url("posters/odyssey2.webp"); }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #111; color: var(--ink); font-family: var(--f-text); min-height: 100vh; display: flex; gap: 40px; align-items: center; justify-content: center; padding: 30px; flex-wrap: wrap; }
+  button, a { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-decoration: none; }
+
+  .controls { width: 230px; display: grid; gap: 10px; font: 13px/1.4 "Inter Tight", sans-serif; color: #ccc; }
+  .controls p { color: #888; }
+  .controls button { padding: 8px 12px; border: 1px solid #444; border-radius: 99px; text-align: left; font: inherit; }
+  .controls button.on { background: #eee; color: #111; }
+  @media (max-width: 700px) { body { display: block; padding: 0; } .controls { display: none; } .phone { width: 100vw; height: 100dvh; border-radius: 0; } }
+
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; position: relative; background: #2a3540; isolation: isolate; }
+  .bg { position: absolute; inset: 0; z-index: -1; }
+  .bg .wash { position: absolute; inset: -30%; background: var(--poster) center 30% / cover; filter: blur(70px) saturate(1.35) brightness(1.02); }
+  .bg .poster { position: absolute; left: 0; right: 0; top: 0; height: 150px; background: var(--poster) center 62% / cover; opacity: 0; transition: opacity .6s ease;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 45%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 45%, transparent 100%); }
+  .withposter .bg .poster { opacity: .45; }
+  .bg .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,30,46,.4) 0%, rgba(14,30,46,.45) 50%, rgba(10,24,38,.6) 100%); }
+  .scroll { position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none; padding-bottom: 180px; }
+  .scroll::-webkit-scrollbar { display: none; }
+  .frost { position: relative; isolation: isolate;
+    background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.06) 45%, rgba(255,255,255,.03) 70%, rgba(255,255,255,.11) 100%);
+    backdrop-filter: blur(24px) saturate(1.3); -webkit-backdrop-filter: blur(24px) saturate(1.3); }
+  .frost::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; opacity: .14; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>"); }
+  .glass { position: relative; isolation: isolate; background: linear-gradient(135deg, rgba(255,255,255,.24), rgba(238,243,247,.1) 55%, rgba(255,255,255,.16));
+    backdrop-filter: blur(30px) saturate(1.4) brightness(1.06); -webkit-backdrop-filter: blur(30px) saturate(1.4) brightness(1.06); }
+
+  /* Header: the film in one small line, the steps, then the step itself as the big title. */
+  .top { display: flex; align-items: flex-start; gap: var(--s-1); padding: 58px var(--edge) 0; }
+  .back { width: 36px; height: 36px; margin-left: -10px; display: grid; place-items: center; font-size: 24px; }
+  .top .film b { display: block; font: var(--t-label-l); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+  .top .film span { display: block; margin-top: 4px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-1); padding: var(--s-2) var(--edge) 0; }
+  .steps span { padding-top: var(--s-1); border-top: 2px solid rgba(244,248,251,.16); font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .steps span.on { border-top-color: var(--ink); color: var(--ink); }
+  .steps span.done { border-top-color: rgba(244,248,251,.55); }
+  .title { padding: var(--s-4) var(--edge) 0; }
+  .title h1 { font: var(--t-display-m); letter-spacing: .01em; text-transform: uppercase; }
+  .queue { margin-top: var(--s-1); display: flex; justify-content: space-between; align-items: baseline; font: var(--t-body); color: var(--soft); }
+  .queue b { font: var(--t-number-s); letter-spacing: .025em; color: var(--ink); }
+  .title p { margin-top: var(--s-1); font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+
+  /* Popcorn: four sizes, one bucket that grows. */
+  .sizes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding-top: var(--s-2); }
+  .size { position: relative; display: flex; align-items: center; gap: var(--s-2); padding: 14px 16px; border-radius: 20px; text-align: left; background: rgba(238,243,247,.07); transition: background .5s ease; }
+  .size .pic { display: none; width: 40px; height: 48px; align-items: flex-end; justify-content: center; flex: none; }
+  .pics .size .pic { display: flex; }
+  .pics .size { padding: 10px 14px; }
+  .pics .size .pic { width: 52px; height: 60px; }
+  .pics .size img { height: calc(var(--h) * 1.25); }
+  .hero { display: none; margin: var(--s-2) var(--edge) 0; align-items: flex-end; justify-content: center; }
+  .popbox { margin: var(--s-4) var(--edge) 0; }
+  .hero::before { content: ""; position: absolute; left: 50%; bottom: -6px; width: 220px; height: 60px; margin-left: -110px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(244,248,251,.16), transparent); }
+  .amount { display: flex; align-items: center; justify-content: center; gap: var(--s-2); height: 0; opacity: 0; overflow: hidden; transition: height .4s ease, opacity .4s ease, margin .4s ease; }
+  .amount.on { height: 32px; opacity: 1; margin-top: var(--s-1); }
+  .amount button { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; }
+  .amount svg { width: 11px; height: 11px; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+  .amount i { min-width: 40px; text-align: center; font: var(--t-number-s); font-style: normal; }
+  .hero { position: relative; padding-top: var(--s-2); }
+  .hero::after { content: ""; position: absolute; left: 50%; bottom: 2px; width: 150px; height: 16px; margin-left: -75px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(0,0,0,.35), transparent); }
+  .buckets { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: center; }
+  .buckets img { height: var(--hh, 120px); transition: height .5s cubic-bezier(.2,.8,.2,1); animation: pop-in .45s cubic-bezier(.2,.8,.2,1) both; }
+  .buckets img + img { margin-left: -18px; }
+  @keyframes pop-in { from { opacity: 0; filter: blur(4px); transform: translateY(6px) scale(.96); } }
+  .heroMode .hero { display: flex; justify-content: center; }
+  .size img { height: var(--h); width: auto; object-fit: contain; }
+  .size .line { display: flex; align-items: baseline; gap: var(--s-1); }
+  .size b { font: var(--t-number-m); letter-spacing: .025em; }
+  .size em { font: var(--t-number-s); font-style: normal; font-size: 16px; color: var(--soft); }
+  .size small { display: block; margin-top: 4px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .size.on { background: rgba(238,243,247,.22); }
+  .aiPop .size.on { background: rgba(255,59,47,.42); }
+  .size .step { display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); align-items: center; height: 30px; border-radius: 15px; background: rgba(238,243,247,.22); }
+  .size.on .step { display: none; }
+  .size .step i { min-width: 12px; text-align: center; font: var(--t-number-s); font-size: 15px; font-style: normal; }
+  .size .step span { width: 26px; height: 30px; display: grid; place-items: center; }
+  .size .step svg { width: 10px; height: 10px; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+  .size.land { animation: seep 1.1s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes seep { 0% { opacity: .6; filter: blur(2px); } 100% { opacity: 1; filter: none; } }
+  .hint { padding: var(--s-2) var(--edge) 0; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); opacity: 0; transition: opacity .5s ease; }
+  .hint { display: none; } .quiet .hint { display: block; opacity: 1; }
+
+  /* Refill at the break. */
+  .refill { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); margin: var(--s-3) var(--edge) 0; padding: 14px 16px; border-radius: 20px; background: rgba(238,243,247,.06); width: calc(100% - 2 * var(--edge)); text-align: left; }
+  .refill b { display: block; font: 500 15px/1.3 var(--f-text); }
+  .refill span { display: block; margin-top: 4px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .switch { flex: none; width: 46px; height: 28px; border-radius: 14px; background: rgba(238,243,247,.16); position: relative; transition: background .4s ease; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transition: transform .4s cubic-bezier(.2,.8,.2,1); }
+  .refill.on .switch { background: rgba(238,243,247,.45); }
+  .refill.on .switch::after { transform: translateX(18px); }
+
+  /* Shelves: deals, drinks, more. Cut-out products float on the blur. */
+  .shelf { padding: var(--s-3) 0 0; }
+  .shelf h2 { padding: 0 var(--edge); font: var(--t-label-l); letter-spacing: .04em; }
+  .row { display: flex; gap: var(--s-1); overflow-x: auto; padding: var(--s-2) var(--edge) 2px; scroll-padding-inline: var(--edge); scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .row::-webkit-scrollbar { display: none; }
+  .card { flex: 0 0 216px; scroll-snap-align: start; position: relative; isolation: isolate; padding: 14px 16px 16px; border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 50%, rgba(255,255,255,.07)); }
+  .card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; opacity: 0; transition: opacity .6s ease;
+    background: radial-gradient(120% 90% at 30% 20%, rgba(255,255,255,.22), rgba(255,255,255,.06) 60%, transparent), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+    background-blend-mode: normal, overlay; }
+  .card::before { background: rgba(255,255,255,.03); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    -webkit-mask-image: radial-gradient(circle at 88% 12%, #000 0%, #000 30%, transparent 60%); mask-image: radial-gradient(circle at 88% 12%, #000 0%, #000 30%, transparent 60%);
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: 88% 12%; mask-position: 88% 12%; }
+  .card.wash::before { animation: wash 1.1s ease-out; }
+  @keyframes wash { 0% { opacity: 0; -webkit-mask-size: 0% 0%; mask-size: 0% 0%; } 35% { opacity: 1; } 100% { opacity: 0; -webkit-mask-size: 400% 400%; mask-size: 400% 400%; } }
+  .tick { animation: tick .3s cubic-bezier(.2,.8,.2,1); }
+  @keyframes tick { from { opacity: 0; transform: translateY(-6px); filter: blur(2px); } }
+  .card .ph { height: 118px; margin-top: 26px; display: grid; place-items: center; }
+  .card .ph img { max-width: 100%; max-height: 118px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(0,0,0,.25)); }
+  .card .ph.duo { display: flex; justify-content: center; align-items: flex-end; }
+  .card .ph.duo img { max-height: 108px; } .card .ph.duo img + img { margin-left: -30px; max-height: 84px; }
+  .card .name { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-1); margin-top: var(--s-2); }
+  .card b { font: 500 15px/1.25 var(--f-text); }
+  .card .price { font: var(--t-number-s); font-size: 17px; letter-spacing: .025em; flex: none; }
+  .card .sub { display: block; margin-top: 4px; font: var(--t-label); font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .card .flag { position: absolute; top: 14px; left: 16px; z-index: 1; font: var(--t-label); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: rgba(238,243,247,.16); padding: 4px 8px; border-radius: 99px; }
+  .card .add { position: absolute; right: 12px; top: 12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(238,243,247,.16); font: var(--t-number-s); font-size: 15px; z-index: 1; }
+  .card .add svg { width: 11px; height: 11px; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+  .card .qty { position: absolute; right: 12px; top: 12px; z-index: 1; display: flex; align-items: center; height: 30px; border-radius: 15px; background: rgba(238,243,247,.4);
+    overflow: hidden; animation: open .35s cubic-bezier(.2,.8,.2,1) both; }
+  .card .qty button { width: 30px; height: 30px; display: grid; place-items: center; }
+  .card .qty svg { width: 11px; height: 11px; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+  .card .qty i { min-width: 14px; text-align: center; font: var(--t-number-s); font-size: 15px; font-style: normal; }
+  @keyframes open { from { max-width: 30px; } to { max-width: 100px; } }
+
+  /* The assistant. */
+  .haze { position: absolute; left: 0; right: 0; bottom: 0; height: 240px; pointer-events: none; z-index: 4; opacity: .55;
+    background: radial-gradient(70% 55% at 50% 100%, rgba(255,59,47,.42), rgba(255,80,70,.12) 55%, transparent 80%);
+    transition: opacity .9s ease, height .9s cubic-bezier(.2,.8,.2,1), filter .9s ease; }
+  .mine .haze { opacity: .18; filter: grayscale(1); }
+  .aura { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .45s ease; z-index: 5;
+    background: linear-gradient(90deg, rgba(255,60,50,.16), transparent 5%, transparent 95%, rgba(255,60,50,.16)), linear-gradient(180deg, transparent 52%, rgba(8,12,18,.6) 80%); }
+  .aura::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42%; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 60%); mask-image: linear-gradient(180deg, transparent, #000 60%); }
+  .speaking .aura { opacity: 1; }
+  .speaking .haze { opacity: 1; height: 340px; }
+  .voice { position: absolute; left: var(--edge); right: var(--edge); bottom: 150px; z-index: 6; opacity: 0; filter: blur(8px); transform: translateY(10px); pointer-events: none;
+    transition: opacity .6s ease, filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .speaking .voice { opacity: 1; filter: none; transform: none; transition-delay: .1s; }
+  .voice small { display: block; font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); margin-bottom: 6px; }
+  .voice p { font: 400 17px/1.45 var(--f-text); }
+
+  /* Actions: skip quietly, or continue with the total. */
+  .actions { position: absolute; left: var(--edge); right: var(--edge); bottom: 22px; z-index: 6; display: flex; flex-direction: column-reverse; align-items: stretch; gap: 0; }
+  /* Content fades out under the actions, so "No thanks" never sits on top of a card. */
+  .actions::before { content: ""; position: absolute; left: calc(-1 * var(--edge)); right: calc(-1 * var(--edge)); bottom: -44px; height: 170px; z-index: -1; pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(16,26,36,.75) 55%); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%); mask-image: linear-gradient(180deg, transparent, #000 45%); }
+  .skip { height: 40px; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+  .cta { height: 60px; border-radius: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; transition: background .5s ease; }
+  .cta b { font: var(--t-button); }
+  .cta span { font: var(--t-number-s); letter-spacing: .025em; }
+  .aipick .cta { background: rgba(255,59,47,.34); }
+
+  .reveal .scroll > *, .reveal .actions { opacity: 0; filter: blur(10px); transform: translateY(10px); }
+  .revealed .scroll > *, .revealed .actions { opacity: 1; filter: none; transform: none; transition: opacity .55s ease, filter .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+  .revealed .steps { transition-delay: .04s; } .revealed .title { transition-delay: .08s; } .revealed .sizes { transition-delay: .14s; }
+  .revealed .hint, .revealed .refill { transition-delay: .2s; } .revealed .shelf { transition-delay: .26s; } .revealed .shelf + .shelf { transition-delay: .32s; } .revealed .shelf + .shelf + .shelf { transition-delay: .38s; } .revealed .actions { transition-delay: .3s; }
+
+  /* The current step is named by the big title, so its label in the steps stays empty (no repeat). */
+  .steps span.on { color: var(--ink); }
+  .top .film b, .film b { font-weight: 700; }
+
+  /* Background with real shapes and colour areas (less blur, a second sharper layer), so the frosted surfaces have something to blur. */
+  .bg .wash { inset: -10%; filter: blur(26px) saturate(1.35) brightness(.98); background-position: center 40%; }
+  .bg .wash2 { position: absolute; inset: -15%; background: var(--poster) 30% 70% / 180% auto; filter: blur(48px) saturate(1.5); opacity: .55; mix-blend-mode: screen; }
+  .bg .shade { background: linear-gradient(180deg, rgba(14,30,46,.18) 0%, rgba(14,30,46,.32) 45%, rgba(10,24,38,.55) 100%); }
+  /* Red frosted glass: see-through, light from one corner, a little grain. */
+  .aipick .cta, .aiPop .size.on {
+    background: linear-gradient(135deg, rgba(255,110,95,.62) 0%, rgba(255,59,47,.32) 50%, rgba(255,59,47,.16) 75%, rgba(255,120,105,.42) 100%);
+    backdrop-filter: blur(26px) saturate(1.6) brightness(1.05); -webkit-backdrop-filter: blur(26px) saturate(1.6) brightness(1.05); }
+  .aipick .cta::after, .aiPop .size.on::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: .18; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>"); }
+  /* The big step title sits close to the steps, as one header. */
+  .steptitle, .title { padding-top: var(--s-2); }
+
+  /* ===== Design-system pass ===== */
+  /* Type on this screen uses only these:
+     Display M 40 (SNACKS) · Button 17 (film name, Continue, item names) · Body 15 (queue line)
+     Number S 20 (every price, size letter, amount, total) · Label 11 (details, steps, section titles). */
+  .top .film b { font: var(--t-label-l); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .back { height: 18px; margin-top: -1px; }
+  .top .film span { font: var(--t-label); }
+  .title .queue { display: block; font: var(--t-body); letter-spacing: 0; text-transform: none; color: var(--soft); }
+  .size b, .size em, .amount i, .card .price, .cta span { font: var(--t-number-s); letter-spacing: .025em; }
+  .size b { color: var(--ink); } .size em { color: var(--soft); }
+  .card b, .refill b { font: var(--t-button); font-size: 16px; }
+  .shelf h2 { font: var(--t-label-l); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+  .card .sub:empty { display: none; }
+
+  /* Surfaces like on the film page: one even, see-through frost. The blur does the work; no dark base, no inner gradients. */
+  .bg .shade { background: linear-gradient(180deg, rgba(14,30,46,.22) 0%, rgba(14,30,46,.3) 50%, rgba(10,24,38,.48) 100%); }
+  .title .queue b { font: var(--t-number-s); letter-spacing: .025em; color: var(--ink); }
+  /* Optical trick for readability: glass dims bright things behind it more than dark ones (brightness + contrast in the blur). */
+  /* The brightness filter drew a dark rim on the edges; the darkening now comes only from the background layer below, so surfaces stay soft patches. */
+  .size, .refill, .card { background: rgba(244,248,251,.09); backdrop-filter: blur(22px) saturate(1.25); -webkit-backdrop-filter: blur(22px) saturate(1.25); }
+  /* Same idea for text that sits straight on the background: bright areas are multiplied down, dark ones barely change. */
+  .bg::after { content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
+    background: linear-gradient(180deg, rgb(178,182,188) 0%, rgb(205,208,212) 35%, rgb(235,236,238) 70%, #fff 100%); }
+  .glass { background: rgba(244,248,251,.12); }
+  /* Small round buttons (+, −, the add button): flat and simple. */
+  .tickets button, .amount button, .card .add, .card .qty { background: rgba(244,248,251,.16) !important; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .glass::before { display: none; }
+
+  /* The assistant's red: one red, more or less see-through in places, never darker. */
+  .aipick .cta, .aiPop .size.on {
+    background:
+      radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.5), transparent 75%),
+      radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.4), transparent 75%),
+      rgba(255,59,47,.22);
+    backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4); }
+  .aipick .cta::after, .aiPop .size.on::after { display: none; }
+
+  /* Top a step larger. */
+  .top .film b { font-size: 15px; }
+  .top .film span { font-size: 12px; }
+  .title h1 { font-size: 48px; }
+  .title .queue { font-size: 16px; }
+  .refill .rprice { margin-left: auto; margin-right: var(--s-2); font: var(--t-number-s); font-style: normal; font-size: 17px; color: var(--soft); }
+  /* Queue saving variants. */
+  .trow { display: flex; justify-content: space-between; align-items: flex-end; }
+  .qB, .qC, .qD { display: none; }
+  .vB .qA, .vC .qA, .vD .qA, .vE .qA, .vF .qA, .vG .qA { display: none; }
+  .qE, .qF, .qG { display: none; }
+  .vB .qB { display: block; text-align: right; padding-bottom: 6px; }
+  .qB b { display: block; font: var(--t-number-m); font-size: 26px; color: var(--ink); }
+  .qB span { font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .vC .qC { display: flex; align-items: center; gap: var(--s-1); margin-top: var(--s-1); font: var(--t-body); font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--soft); }
+  .qC .pill { padding: 4px 10px; border-radius: 99px; background: rgba(244,248,251,.16); font: var(--t-number-s); font-size: 16px; color: var(--ink); }
+  .vD .qD { display: flex; align-items: baseline; gap: var(--s-2); margin-top: var(--s-1); }
+  .qD b { font: var(--t-number-l); color: var(--ink); white-space: nowrap; }
+  .qD span { font: var(--t-body); font-size: 14px; line-height: 1.35; color: var(--soft); }
+  /* E, F, G: the line first, the saving after it, no pill. */
+  .vE .qE, .vF .qF { display: block; margin-top: var(--s-1); font: var(--t-body); font-size: 17px; letter-spacing: 0; text-transform: none; color: var(--soft); }
+  .qE b, .qF b { font: var(--t-number-s); font-size: 20px; letter-spacing: .025em; color: var(--ink); margin-left: 4px; }
+  .qF i { font-style: normal; color: var(--soft); }
+  .vG .qG { display: flex; justify-content: space-between; align-items: flex-end; margin-top: var(--s-1); }
+  .qG span { font: var(--t-body); font-size: 17px; line-height: 1.3; color: var(--soft); }
+  .qG b { font: var(--t-number-l); font-size: 34px; line-height: 1; color: var(--ink); }
+  .qG b small { font: var(--t-label); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--soft); margin-left: 4px; }
+  /* Cards: a little more air under the name; the Save tag in the label size; price a touch smaller than before so it sits with the name. */
+  .card .sub { margin-top: var(--s-1); font-size: 11px; }
+  .card .flag { font-size: 11px; padding: 4px 10px; }
+  .card .price { font-size: 18px; }
+
+  /* Shared across the booking steps. */
+  .aipick .cta {
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.5), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.4), transparent 75%), rgba(255,59,47,.22) !important;
+    backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4); }
+  .aipick .cta::after { content: ""; display: block !important; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: .12; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+  .top .film b, .film b { font: var(--t-label-l) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: .08em !important; }
+  .top .film span, .film span { font-size: 12px !important; }
+  .bggrain { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .3; mix-blend-mode: overlay; background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+
+  /* Voice, shared: focused side light, a slow blurred exit, the page behind dims. */
+  .aura { background: linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)), linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%) !important;
+    transition: opacity 1.1s ease !important; }
+  .aura::after { display: none !important; }
+  .haze { height: 140px !important; transition: opacity 1.1s ease !important; }
+  .speaking .haze { height: 170px !important; }
+  .voice { transition: opacity 1.1s ease, filter 1.1s ease, transform 1.1s cubic-bezier(.2,.8,.2,1) !important; }
+  .dimmable { transition: opacity .8s ease; }
+  .speaking .dimmable { opacity: .12; }
+
+  /* The voice sits on a dark, blurred floor that sets it apart. */
+  .speaking .aura { background:
+      linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)),
+      linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, transparent 50%, rgba(8,12,18,.62) 78%) !important; }
+  .aura::after { display: block !important; content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44%;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .speaking .dimmable { opacity: .35 !important; }
+  .voice { transition: opacity .85s ease, filter .85s ease, transform .85s cubic-bezier(.2,.8,.2,1) !important; }
+  .aura, .haze { transition: opacity .85s ease !important; }
+
+  /* Balanced floor (like seats): a soft dark fade and a light blur, not the whole bottom; light also at the top edge. */
+  .speaking .aura { background:
+      linear-gradient(90deg, rgba(255,60,50,.32), transparent 4%, transparent 96%, rgba(255,60,50,.32)),
+      linear-gradient(0deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, rgba(255,60,50,.2), transparent 5%),
+      linear-gradient(180deg, transparent 58%, rgba(8,12,18,.55) 82%) !important; }
+  .aura::after { height: 34% !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
+  .dimmable, .shelf, .refill { transition: opacity .8s ease; }
+  .speaking .shelf { opacity: .25; }
+
+  /* A quiet bar at the top, with the back arrow, once you scroll down. */
+  .sticky { position: absolute; left: 0; right: 0; top: 0; height: 96px; z-index: 8; display: flex; align-items: flex-end; padding: 0 12px 10px; pointer-events: none;
+    opacity: 0; transition: opacity .4s ease; background: linear-gradient(180deg, rgba(14,26,38,.55), transparent);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent); mask-image: linear-gradient(180deg, #000 60%, transparent); }
+  .sticky a { pointer-events: auto; width: 44px; height: 44px; display: grid; place-items: center; font-size: 26px; color: var(--ink); }
+  .scrolled .sticky { opacity: 1; }
+
+  /* See-through glass: less blur, so the background shows its shapes through every surface and the red button. */
+  .size, .refill, .card { backdrop-filter: blur(10px) saturate(1.3) !important; -webkit-backdrop-filter: blur(10px) saturate(1.3) !important; background: rgba(244,248,251,.08) !important; }
+  .glass, .cta a { backdrop-filter: blur(12px) saturate(1.35) !important; -webkit-backdrop-filter: blur(12px) saturate(1.35) !important; }
+  .aipick .cta, .aipick .cta a, .aiPop .size.on {
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14) !important;
+    backdrop-filter: blur(10px) saturate(1.5) !important; -webkit-backdrop-filter: blur(10px) saturate(1.5) !important; }
+
+  /* Back bar: shows as soon as you scroll, short and soft. */
+  .sticky { height: 72px !important; padding-bottom: 6px !important; background: linear-gradient(180deg, rgba(14,26,38,.35), transparent) !important;
+    backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important;
+    -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent) !important; mask-image: linear-gradient(180deg, #000 45%, transparent) !important; }
+
+  /* Header rhythm: one family for the small lines (mono), more air between the three layers. */
+  .top .film b, .film b { font-size: 14px !important; }
+  .top .film span, .film span { font-size: 11px !important; margin-top: 6px !important; }
+  .steps { padding-top: var(--s-3) !important; }
+  .title, .steptitle { padding-top: var(--s-4) !important; }
+  .qG span { font: var(--t-body) !important; font-size: 15px !important; line-height: 1.25 !important; }
+  .qG b { font-size: 30px !important; }
+  .qG b small { font: var(--t-label) !important; }
+
+  /* The bucket stands in a fixed stage, so the space above it stays the same for every size; it is larger overall. */
+  .popbox { margin-top: var(--s-2) !important; }
+  .hero { height: 168px; padding-top: 0 !important; align-items: flex-end; }
+
+  /* Your chosen size reads as chosen: a lighter frost, with a brief soft blur as it is picked. */
+  .size.on { background: rgba(244,248,251,.24) !important; animation: picked .5s ease; }
+  .aiPop .size.on { animation: none; }
+  @keyframes picked { 0% { filter: blur(2px); } 100% { filter: none; } }
+
+  /* The voice floor: its own layer, so its blur is right from the first frame. */
+  .aura::after { display: none !important; }
+  .vfloor { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; z-index: 5; pointer-events: none;
+    opacity: 0 !important; transition: opacity .85s ease !important; transform: none !important; filter: none !important;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 55%); mask-image: linear-gradient(180deg, transparent, #000 55%); }
+  .speaking .vfloor { opacity: 1 !important; }
+
+  /* The button arrives by itself (not its wrapper), so its glass is right from the first frame. */
+  .reveal .actions, .revealed .actions { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .reveal .actions > * { opacity: 0; transform: translateY(10px); }
+  .revealed .actions > * { opacity: 1; transform: none; transition: opacity .55s ease .3s, transform .55s cubic-bezier(.2,.8,.2,1) .3s; }
+  /* Words only after the floor is there. */
+  .speaking .voice { transition-delay: .4s !important; }
+
+  .hint { font: var(--t-body) !important; font-size: 14px !important; letter-spacing: 0 !important; text-transform: none !important; line-height: 1.4 !important; }
+  /* On a phone the frame is the whole screen (this rule came before the frame's own size, so it lost). */
+  @media (max-width: 700px) { html, body { overflow: hidden; } .controls { display: none !important; } .phone { width: 100vw !important; height: 100dvh !important; border-radius: 0 !important; } }
+  /* The voice light breathes, very slightly: a soft swell of the edges, never still, never busy. */
+  @keyframes aura-breathe { 0% { transform: none; filter: brightness(1); } 100% { transform: scale(1.03); filter: brightness(1.45); } }
+  .speaking .aura { animation: aura-breathe 3.2s ease-in-out infinite alternate; }
+  /* The assistant's red comes in slowly, as a layer that fades, instead of switching at once. */
+  .size, .cta { isolation: isolate; }
+  .aipick .cta, .aiPop .size.on { background: rgba(244,248,251,.1) !important; }
+  .size::before, .cta::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none; opacity: 0;
+    background: radial-gradient(70% 140% at 18% 30%, rgba(255,59,47,.42), transparent 75%), radial-gradient(60% 120% at 88% 80%, rgba(255,59,47,.32), transparent 75%), rgba(255,59,47,.14);
+    transition: opacity 1.6s cubic-bezier(.4,0,.2,1); }
+  .aiPop .size.on::before, .aipick .cta::before { opacity: 1; }
+  .size.land { animation: none !important; }
+  .hasorder .cta { background: rgba(244,248,251,.1) !important; }
+  .hasorder .cta::before { opacity: 1; }
+  .glass.cta::before { display: block; }
+  .instant .size::before, .instant .cta::before, .instant .size, .instant .cta, .instant .switch, .instant .refill { transition: none !important; animation: none !important; }
+  /* The voice light rises from the bottom edge too, like on the seats page. */
+  .aura::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; pointer-events: none;
+    background: radial-gradient(80% 100% at 50% 100%, rgba(255,59,47,.38), rgba(255,70,60,.1) 55%, transparent 80%); }
+</style>
+<script src="mode.js"></script>
+<script src="fullscreen.js"></script>
+<script src="fromplan.js"></script>
+<script src="drag.js"></script>
+</head>
+<body>
+<div class="controls">
+  <p>Snacks · compare (outside the app)</p>
+  <button id="cGuided" class="on">Guided · the assistant picks, live</button>
+  <button id="cQuiet">Unguided · voice off, already picked</button>
+  <p>Pick another size, flip the refill or add anything: the assistant's red steps back to plain glass.</p>
+  <button id="cReplay">↺ Replay</button>
+  <p>Queue saving</p>
+  <button data-q="A" class="qsw on">A · In the sentence</button>
+  <button data-q="B" class="qsw">B · Number by the title</button>
+  <button data-q="C" class="qsw">C · A small pill</button>
+  <button data-q="D" class="qsw">D · Big number, line under</button>
+  <button data-q="E" class="qsw">E · Number after the line</button>
+  <button data-q="F" class="qsw">F · Saved, at the end</button>
+  <button data-q="G" class="qsw">G · Line left, number right</button>
+  <p>Poster at the top</p>
+  <button id="psOff" class="on">Off</button>
+  <button id="psOn">On, faint</button>
+  <p>Popcorn sizes</p>
+  <button id="pOff">A · Text only</button>
+  <button id="pOn">B · Picture in each tile</button>
+  <button id="pHero" class="on">C · One bucket that grows</button>
+</div>
+
+<div class="phone reveal" id="phone">
+  <div class="bggrain"></div><div class="bg"><div class="wash"></div><div class="wash2"></div><div class="shade"></div><div class="poster"></div></div>
+  <div class="scroll">
+    <div class="top"><a class="back" href="seats-design.html">‹</a><div class="film"><b>The Odyssey</b><span>Fri 13 · 20:40 · F6, F7</span></div></div>
+    <div class="steps"><span class="done">1 · Seats</span><span class="on">2 · Snacks</span><span>3 · Confirm</span></div>
+    <div class="title">
+      <div class="trow"><h1>Snacks</h1><div class="qB"><b>14 min</b><span>less in line</span></div></div>
+      <p class="queue qA">Order ahead and save <b>14 min</b> in line</p>
+      <p class="qC"><span class="pill">−14 min</span> Order ahead, skip the line</p>
+      <div class="qD"><b>14 min</b><span>Saved by ordering ahead. The queue is long tonight.</span></div>
+      <p class="qE">Order ahead, skip the line <b>−14 min</b></p>
+      <p class="qF">Order ahead and skip the line <i>·</i> <b>14 min saved</b></p>
+      <div class="qG"><span>Order ahead,<br>skip the line</span><b>−14<small>min</small></b></div>
+    </div>
+
+    <div class="popbox" id="popbox">
+      <div class="hero" id="hero"><div class="buckets" id="buckets"></div></div>
+      <div class="amount" id="amount"><button class="pless glass" aria-label="One less"><svg viewBox="0 0 12 12"><path d="M1 6h10"/></svg></button><i id="amountN">1</i><button class="pmore glass" aria-label="One more"><svg viewBox="0 0 12 12"><path d="M1 6h10M6 1v10"/></svg></button></div>
+      <div class="sizes" id="sizes"></div>
+    </div>
+    <p class="hint">A large for two and a 2h 50m film. Last time, a medium ran out halfway.</p>
+    <button class="refill" id="refill"><div><b>Refill at the break</b><span>Popcorn and drinks</span></div><em class="rprice">+&thinsp;₪12</em><i class="switch"></i></button>
+
+    <div class="shelf"><h2>Deals</h2><div class="row" id="deals"></div></div>
+    <div class="shelf"><h2>Drinks</h2><div class="row" id="drinks"></div></div>
+    <div class="shelf"><h2>More</h2><div class="row" id="more"></div></div>
+  </div>
+
+  <div class="sticky"><a href="seats-design.html" aria-label="Back">‹</a></div>
+  <div class="haze"></div>
+  <div class="vfloor"></div><div class="aura"></div>
+  <div class="voice"><small>Lumen</small><p>A large for the two of you and a 2h 50m film. Last time a medium ran out halfway, so I added a refill for the break.</p></div>
+  <div class="actions"><button class="skip" id="skip">No thanks</button><a class="cta glass" href="confirm-design.html" id="cta"><b>Continue</b><span id="total">₪0</span></a></div>
+</div>
+
+<script>
+  const IMG = k => `snacks/${k}.png`;
+  const SIZES = [['S', 22, '1 person', 32], ['M', 28, '1–2 people', 38], ['L', 34, '2 people', 43], ['XL', 39, '3+ people', 48]];
+  const POPIMG = { S: 'popcorn-s', M: 'popcorn-m', L: 'popcorn-l', XL: 'popcorn-l' };
+  const SHELVES = {
+    deals: [['d1', 'Movie night for 2', 'Popcorn L + 2 drinks', 48, 'Save ₪10', ['popcorn-l', 'soda']], ['d2', 'Sweet tooth', 'Popcorn M + candies', 36, 'Save ₪6', ['popcorn-m', 'candies']], ['d3', 'Family box', 'Popcorn XL + 4 drinks', 69, 'Save ₪15', ['popcorn-white', 'soda']]],
+    drinks: [['cola', 'Cola', '', 16, '', ['soda']], ['zero', 'Cola zero', '', 16, '', ['soda']], ['water', 'Water', '', 9, '', ['bottle']]],
+    more: [['nachos', 'Nachos and cheese', '', 28, '', ['nachos']], ['hotdog', 'Hot dog', '', 24, '', ['hot-dog']], ['candies', 'Chocolate candies', '', 14, '', ['candies']], ['bar', 'Chocolate bar', '', 12, '', ['candy-bar']], ['sweetpop', 'Sweet popcorn', '', 31, '', ['popcorn-white']]],
+  };
+  const ALL = Object.values(SHELVES).flat();
+  const PLUS = '<svg viewBox="0 0 12 12"><path d="M1 6h10M6 1v10"/></svg>';
+  const phone = document.getElementById('phone');
+  let st;
+  const fresh = () => ({ size: null, n: 1, refill: false, extras: {} });
+  st = fresh();
+
+  document.getElementById('sizes').innerHTML = SIZES.map(([s, p, w, h]) =>
+    `<button class="size" data-s="${s}" style="--h:${h}px"><span class="pic"><img src="${IMG(POPIMG[s])}" alt=""></span><span><span class="line"><b>${s}</b><em>₪${p}</em></span><small>${w}</small></span><span class="step"><span class="pless"><svg viewBox="0 0 12 12"><path d="M1 6h10"/></svg></span><i>1</i><span class="pmore"><svg viewBox="0 0 12 12"><path d="M1 6h10M6 1v10"/></svg></span></span></button>`).join('');
+  for (const [id, list] of Object.entries(SHELVES)) {
+    document.getElementById(id).innerHTML = list.map(([k, n, sub, p, flag, imgs]) =>
+      `<div class="card" data-k="${k}">${flag ? `<span class="flag">${flag}</span>` : ''}<div class="ph ${imgs.length > 1 ? 'duo' : ''}">${imgs.map(i => `<img src="${IMG(i)}" alt="">`).join('')}</div>
+        <div class="name"><b>${n}</b><span class="price">₪${p}</span></div><span class="sub">${sub}</span><div class="slot"></div></div>`).join('');
+  }
+  function draw() {
+    const hh = { S: 126, M: 138, L: 150, XL: 162 }[st.size] || 138, hero = document.getElementById('hero');
+    hero.style.setProperty('--hh', hh + 'px');
+    const bk = document.getElementById('buckets'), want = st.size ? st.n : 1, src = IMG(st.size ? POPIMG[st.size] : 'popcorn-m');
+    while (bk.children.length < want) { const im = document.createElement('img'); im.alt = ''; bk.appendChild(im); }
+    while (bk.children.length > want) bk.lastChild.remove();
+    [...bk.children].forEach(im => { if (!im.src.endsWith(src)) im.src = src; });
+    document.getElementById('amount').classList.toggle('on', !!st.size);
+    const an = document.getElementById('amountN'), txt = st.n + ' × ' + (st.size || '');
+    if (an.textContent !== txt) { an.textContent = txt; an.classList.remove('tick'); void an.offsetWidth; an.classList.add('tick'); }
+    document.querySelectorAll('.size').forEach(b => b.classList.toggle('on', b.dataset.s === st.size));
+    document.getElementById('refill').classList.toggle('on', st.refill);
+    document.querySelectorAll('.card[data-k="cola"] .sub, .card[data-k="zero"] .sub').forEach(el => el.textContent = st.refill ? 'Free refill at the break' : '');
+    document.querySelectorAll('.card').forEach(card => {
+      const k = card.dataset.k, n = st.extras[k] || 0, slot = card.querySelector('.slot');
+      const before = card.dataset.n || '0';
+      if (String(n) !== before && n > +before) { card.classList.remove('wash'); void card.offsetWidth; card.classList.add('wash'); }
+      card.dataset.n = n;
+      const want = n ? 'qty' : 'add';
+      const was = slot.querySelector('i') && slot.querySelector('i').textContent;
+      if (slot.dataset.mode !== want || (n && was != n)) {
+        slot.dataset.mode = want;
+        slot.innerHTML = n
+          ? `<div class="qty"><button class="less" data-k="${k}" aria-label="One less"><svg viewBox="0 0 12 12"><path d="M1 6h10"/></svg></button><i>${n}</i><button class="more" data-k="${k}" aria-label="One more">${PLUS}</button></div>`
+          : `<button class="add" data-k="${k}" aria-label="Add">${PLUS}</button>`;
+        if (n && was) slot.querySelector('i').classList.add('tick');
+      }
+    });
+    const pop = (SIZES.find(s => s[0] === st.size) || [0, 0])[1] * st.n;
+    const ex = Object.entries(st.extras).reduce((a, [k, n]) => a + n * ALL.find(x => x[0] === k)[3], 0);
+    document.getElementById('total').textContent = '₪' + (pop + (st.refill ? 12 : 0) + ex);
+    phone.classList.toggle('hasorder', pop + (st.refill ? 12 : 0) + ex > 0);
+  }
+  // Any choice of your own: the assistant steps back.
+  const isAiPick = () => st.size === 'L' && st.n === 1 && st.refill && !Object.keys(st.extras).length;
+  const mine = () => {
+    phone.classList.remove('speaking'); timers.forEach(clearTimeout);
+    const ai = isAiPick();
+    phone.classList.toggle('aiPop', st.size === 'L' && st.n === 1);
+    phone.classList.toggle('aiRefill', st.refill);
+    phone.classList.toggle('aipick', ai);
+    phone.classList.toggle('mine', !ai);
+  };
+  document.getElementById('sizes').addEventListener('click', e => {
+    const b = e.target.closest('.size'); if (!b) return;
+    if (st.size !== b.dataset.s) { st.size = b.dataset.s; st.n = 1; } else { st.size = null; st.n = 1; }
+    mine(); draw();
+  });
+  document.getElementById('amount').addEventListener('click', e => {
+    if (e.target.closest('.pmore')) st.n = Math.min(6, st.n + 1);
+    else if (e.target.closest('.pless')) { st.n -= 1; if (!st.n) { st.size = null; st.n = 1; } }
+    else return;
+    mine(); draw();
+  });
+  document.getElementById('refill').addEventListener('click', () => { st.refill = !st.refill; mine(); draw(); });
+  document.querySelector('.scroll').addEventListener('click', e => {
+    let b = e.target.closest('.add, .more, .less');
+    if (!b) { const card = e.target.closest('.card'); if (!card || st.extras[card.dataset.k]) return; b = { dataset: { k: card.dataset.k }, classList: { contains: () => false } }; }
+    const k = b.dataset.k; st.extras[k] = Math.max(0, (st.extras[k] || 0) + (b.classList.contains('less') ? -1 : 1));
+    if (!st.extras[k]) delete st.extras[k];
+    mine(); draw();
+  });
+  document.getElementById('skip').addEventListener('click', () => { st = fresh(); mine(); draw(); });
+
+  const timers = [];
+  function pick(animate) {
+    st.size = 'L'; st.refill = true; phone.classList.add('aiPop', 'aiRefill', 'aipick'); draw();
+    if (animate) document.querySelector('.size.on').classList.add('land');
+  }
+  function reset() {
+    timers.forEach(clearTimeout); timers.length = 0; st = fresh();
+    phone.classList.remove('aiPop', 'aiRefill', 'aipick', 'mine', 'speaking', 'quiet');
+    document.querySelectorAll('.size').forEach(b => b.classList.remove('land')); draw();
+  }
+  function guided() {
+    const sc = document.querySelector('.scroll');
+    const glide = to => { const from = sc.scrollTop, t0 = performance.now(), d = 1100;
+      const step = now => { const k = Math.min(1, (now - t0) / d), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; sc.scrollTop = from + (to - from) * e; if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step); };
+    timers.push(setTimeout(() => glide(150), 300));
+    timers.push(setTimeout(() => phone.classList.add('speaking'), 700));
+    timers.push(setTimeout(() => pick(true), 950));
+    timers.push(setTimeout(() => phone.classList.remove('speaking'), 7500));
+  }
+  function quiet() { phone.classList.add('quiet', 'instant'); setTimeout(() => phone.classList.remove('instant'), 1500);
+    let saved = null; try { saved = JSON.parse(sessionStorage.getItem('lumenSnackState')); } catch (e) {}
+    if (saved) { st = saved; mine(); draw(); } else pick(false); }
+  phone.addEventListener('click', e => {
+    if (!phone.classList.contains('speaking') || e.target.closest('button, a')) return;
+    timers.forEach(clearTimeout); timers.length = 0; if (!st.size) pick(true); phone.classList.remove('speaking');
+  });
+  function arrive(then) {
+    reset();
+    phone.classList.add('reveal'); phone.classList.remove('revealed');
+    requestAnimationFrame(() => requestAnimationFrame(() => phone.classList.add('revealed')));
+    setTimeout(() => then(), current === 'q' ? 300 : 700);
+    setTimeout(() => phone.classList.remove('reveal', 'revealed'), 900);
+  }
+  let current = 'g';
+  const mark = on => { document.getElementById('cGuided').classList.toggle('on', on); document.getElementById('cQuiet').classList.toggle('on', !on); };
+  document.getElementById('cGuided').onclick = () => { current = 'g'; mark(true); arrive(guided); };
+  document.getElementById('cQuiet').onclick = () => { current = 'q'; mark(false); arrive(quiet); };
+  document.getElementById('cReplay').onclick = () => arrive(current === 'g' ? guided : quiet);
+  const layout = m => {
+    phone.classList.toggle('pics', m === 'pOn'); phone.classList.toggle('heroMode', m === 'pHero');
+    ['pOff', 'pOn', 'pHero'].forEach(id => document.getElementById(id).classList.toggle('on', id === m));
+    try { localStorage.setItem('lumenPop', m); } catch (e) {}
+  };
+  ['pOff', 'pOn', 'pHero'].forEach(id => document.getElementById(id).onclick = () => layout(id));
+  let m0 = 'pHero'; try { m0 = localStorage.getItem('lumenPop') || 'pHero'; } catch (e) {} layout(m0);
+  const posterMode = on => {
+    phone.classList.toggle('withposter', on);
+    document.getElementById('psOn').classList.toggle('on', on); document.getElementById('psOff').classList.toggle('on', !on);
+    try { localStorage.setItem('lumenPoster', on ? '1' : '0'); } catch (e) {}
+  };
+  document.getElementById('psOn').onclick = () => posterMode(true);
+  document.getElementById('psOff').onclick = () => posterMode(false);
+  try { posterMode(localStorage.getItem('lumenPoster') === '1'); } catch (e) {}
+  const qset = v => {
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G'].forEach(x => phone.classList.toggle('v' + x, x === v && x !== 'A'));
+    document.querySelectorAll('.qsw').forEach(b => b.classList.toggle('on', b.dataset.q === v));
+    try { localStorage.setItem('lumenQueue', v); } catch (e) {}
+  };
+  document.querySelectorAll('.qsw').forEach(b => b.onclick = () => qset(b.dataset.q));
+  const qp = new URLSearchParams(location.search).get('q');
+  qset(qp || 'G');
+  draw();
+  document.fonts.ready.then(() => { if (LUMEN_MODE === 'off') { arrive(() => { phone.classList.add('quiet'); st = fresh(); draw(); }); return; } if (LUMEN_MODE === 'quiet') { current = 'q'; arrive(quiet); return; } if (sessionStorage.getItem('lumenSnacksSeen')) { current = 'q'; arrive(quiet); } else { sessionStorage.setItem('lumenSnacksSeen', '1'); arrive(guided); } });
+  document.querySelector('.scroll').addEventListener('scroll', e => phone.classList.toggle('scrolled', e.target.scrollTop > 40), { passive: true });
+
+  // Continue: hand the order to the confirm page.
+  const saveOrder = () => {
+    const lines = [];
+    if (st.size) lines.push(['Popcorn ' + st.size, st.n, (SIZES.find(x => x[0] === st.size) || [0, 0])[1] * st.n]);
+    if (st.refill) lines.push(['Refill at the break', 1, 12]);
+    Object.entries(st.extras).forEach(([k, n]) => { const it = ALL.find(x => x[0] === k); lines.push([it[1], n, it[3] * n]); });
+    sessionStorage.setItem('lumenSnackState', JSON.stringify(st));
+    sessionStorage.setItem('lumenOrder', JSON.stringify({ lines, total: lines.reduce((a, l) => a + l[2], 0) }));
+  };
+  document.getElementById('cta').addEventListener('click', saveOrder);
+  document.getElementById('skip').addEventListener('click', () => { st = fresh(); saveOrder(); location.href = 'confirm-design.html'; });
+</script>
+</body>
+</html>

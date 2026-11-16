@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen · assistant demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Anton&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="type.css">
+<style>
+  :root { --ink: #f7fafc; --soft: rgba(244,248,251,.86); --accent: #ff3b2f; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111; color: var(--ink); font-family: var(--f-text); min-height: 100vh; display: flex; gap: 40px; align-items: center; justify-content: center; padding: 30px; flex-wrap: wrap; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .controls { width: 220px; display: grid; gap: 12px; font-size: 13px; color: #ccc; }
+  .controls p { color: #888; line-height: 1.5; }
+  .controls button { padding: 8px 12px; border: 1px solid #444; border-radius: 99px; text-align: left; }
+  .controls button:hover { background: #222; }
+
+  .phone { width: 390px; height: 844px; border-radius: 46px; overflow: hidden; position: relative; background: #000; }
+  .phone iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* The assistant's aura: a soft warm light that comes in from the bottom and hugs the sides. Never a frame. */
+  .aura { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .9s ease; z-index: 5;
+    background:
+      radial-gradient(130% 26% at 50% 106%, rgba(255,59,47,.38), rgba(255,80,70,.12) 50%, transparent 78%),
+      linear-gradient(90deg, rgba(255,60,50,.16), transparent 5%, transparent 95%, rgba(255,60,50,.16)),
+      linear-gradient(180deg, transparent 58%, rgba(8,12,18,.55) 82%); }
+  .aura::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38%;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 70%); mask-image: linear-gradient(180deg, transparent, #000 70%); }
+  .speaking .aura { opacity: 1; }
+
+  /* The line: the assistant at rest. Always there, just above the tab bar. It grows while it speaks, then shrinks back. */
+  .line { position: absolute; left: 50%; bottom: 96px; width: 56px; height: 4px; margin-left: -28px; border-radius: 4px; z-index: 6;
+    background: linear-gradient(90deg, #ff3b2f, #ff7a8a, #ff3b2f); background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(255,59,47,.45);
+    transition: width .7s cubic-bezier(.2,.8,.2,1), margin-left .7s cubic-bezier(.2,.8,.2,1), height .7s ease, opacity .5s ease;
+    animation: drift 4s linear infinite; }
+  @keyframes drift { to { background-position: 200% 0; } }
+  .line::before { content: ""; position: absolute; inset: -16px -24px; }   /* bigger tap area */
+  .speaking .line { width: 200px; margin-left: -100px; }
+
+  /* The voice: one or two lines, in the aura, above the line. No box. */
+  .voice { position: absolute; left: 22px; right: 22px; bottom: 118px; z-index: 6; opacity: 0; filter: blur(8px); transform: translateY(10px);
+    transition: opacity .6s ease, filter .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .speaking .voice { opacity: 1; filter: none; transform: none; transition-delay: .35s; }
+  .voice small { display: block; font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); margin-bottom: 6px; }
+  .voice p { font: 400 17px/1.45 var(--f-text); }
+
+  /* Tap the line: the assistant opens and offers to plan the rest of the night. */
+  .scrim { position: absolute; inset: 0; z-index: 8; background: rgba(6,12,18,.4); opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+  .sheet { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 9; border-radius: 34px; padding: 22px 22px 24px;
+    background: rgba(24,30,38,.62); backdrop-filter: blur(30px) saturate(1.2); -webkit-backdrop-filter: blur(30px) saturate(1.2);
+    border: 1px solid rgba(255,255,255,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.2);
+    transform: translateY(110%); transition: transform .55s cubic-bezier(.2,.8,.2,1); }
+  .sheet::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(90% 60% at 50% 115%, rgba(255,59,47,.35), transparent 70%); }
+  .open .scrim { opacity: 1; pointer-events: auto; }
+  .open .sheet { transform: none; }
+  .open .line { opacity: 0; }
+  .sheet .grab { width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.35); margin: -6px auto 18px; }
+  .sheet h3 { font: var(--t-heading); letter-spacing: .01em; text-transform: uppercase; }
+  .sheet .say { margin-top: 10px; font: 400 15px/1.5 var(--f-text); color: var(--soft); }
+  .sheet ul { list-style: none; margin-top: 18px; display: grid; gap: 10px; }
+  .sheet li { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .sheet li span { font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
+  .sheet li b { font: 500 15px/1.3 var(--f-text); }
+  .sheet .go { margin-top: 20px; width: 100%; height: 56px; border-radius: 28px; display: flex; align-items: center; justify-content: center;
+    font: var(--t-button); background: rgba(255,59,47,.55); border: 1px solid rgba(255,140,130,.45);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); }
+  .sheet .later { display: block; margin: 12px auto 0; font: var(--t-label); letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+</style>
+</head>
+<body>
+<div class="controls">
+  <p>Assistant demo, over the home screen. The red line above the tab bar is the assistant at rest.</p>
+  <button id="speak">▶ Assistant speaks</button>
+  <button id="openBtn">▶ Tap the line</button>
+  <p>It grows into a soft light from the edges, says one line, then shrinks back into the line. It never disappears. Tapping or pulling up the line opens "Plan the rest for me", from any screen.</p>
+</div>
+
+<div class="phone" id="phone">
+  <iframe src="home-design.html?dir=red&font=anton&small=mono&scale=2&shot=1" title="Home"></iframe>
+  <div class="aura"></div>
+  <div class="voice"><small>Lumen</small><p>Picked for tonight, from everything you've loved.</p></div>
+  <button class="line" id="line" aria-label="Lumen: plan the rest for me"></button>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3>Plan the rest for me</h3>
+    <p class="say">I'll pick what you usually would. You can still change anything before you pay.</p>
+    <ul>
+      <li><span>Film</span><b>The Odyssey · IMAX</b></li>
+      <li><span>When</span><b>Fri 13 · 20:40</b></li>
+      <li><span>Seats</span><b>Row G · 12–13</b></li>
+      <li><span>Snacks</span><b>Salted popcorn, M</b></li>
+    </ul>
+    <button class="go">Plan my night</button>
+    <button class="later" id="later">Not now</button>
+  </div>
+</div>
+
+<script>
+  const phone = document.getElementById('phone');
+  let t;
+  function speak() {
+    clearTimeout(t);
+    phone.classList.remove('open');
+    phone.classList.add('speaking');
+    t = setTimeout(() => phone.classList.remove('speaking'), 3600);
+  }
+  const open = () => { clearTimeout(t); phone.classList.remove('speaking'); phone.classList.add('open'); };
+  const close = () => phone.classList.remove('open');
+  document.getElementById('speak').onclick = speak;
+  document.getElementById('openBtn').onclick = open;
+  document.getElementById('line').onclick = open;
+  document.getElementById('scrim').onclick = close;
+  document.getElementById('later').onclick = close;
+  setTimeout(speak, 1200);
+</script>
+</body>
+</html>
