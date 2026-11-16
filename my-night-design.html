@@ -190,7 +190,24 @@
   .phint span { font: var(--t-label); letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
   .pass { transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
   .pass.leaving { transform: translateY(60px); opacity: 0; }
+  /* Add a drink for the break: a small glass sheet over My night. */
+  .dsheet { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 11; padding: 22px 20px 20px; border-radius: 30px;
+    background: rgba(244,248,251,.1); backdrop-filter: blur(28px) saturate(1.2) brightness(.85); -webkit-backdrop-filter: blur(28px) saturate(1.2) brightness(.85);
+    transform: translateY(110%); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .dsheetOn .dsheet { transform: none; } .dsheetOn .tabbar { opacity: 0; }
+  .dsheet .shead { display: flex; justify-content: space-between; align-items: center; }
+  .dsheet .shead b { font: 500 17px/1.2 var(--f-text); }
+  .dsheet .x { width: 36px; height: 36px; border-radius: 50%; background: rgba(244,248,251,.12); display: grid; place-items: center; }
+  .dsheet .x svg { width: 12px; height: 12px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; }
+  .drinks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: var(--s-2); }
+  .drinks button { padding: 12px 8px 12px; border-radius: 18px; background: rgba(244,248,251,.07); display: grid; justify-items: center; gap: 4px; transition: background .4s ease; }
+  .drinks button.on { background: radial-gradient(70% 140% at 30% 30%, rgba(255,59,47,.0), transparent), rgba(244,248,251,.22); }
+  .drinks img { height: 64px; object-fit: contain; }
+  .drinks b { font: 500 14px/1.2 var(--f-text); } .drinks span { font: var(--t-number-s); font-size: 16px; color: var(--soft); }
+  .dpay { width: 100%; height: 56px; margin-top: var(--s-2); border-radius: 28px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; background: rgba(244,248,251,.16); font: var(--t-button); }
+  .dpay span { font: var(--t-number-s); }
 </style>
+<script src="mode.js"></script>
 <script src="fullscreen.js"></script>
 <script src="countdown.js"></script>
 </head>
@@ -257,11 +274,10 @@
           <div><b>Popcorn L refill</b><p class="note">Ready at 22:22</p></div>
           <div class="where"><span class="label dim">Counter</span><span class="val">2</span></div>
         </div>
-        <a class="pill add" href="#">Add a drink for the break</a>
+        <a class="pill add" href="#" id="addDrink">Add a drink for the break</a>
       </div>
 
       <div class="tile" data-show="3" data-lit="3">
-        <span class="label">After the credits</span>
         <div id="credits"><span class="fact">No after-credits scene</span><p class="note">You can leave when the credits roll.</p></div>
       </div>
 
@@ -298,6 +314,16 @@
     <span class="label">Popcorn L</span>
     <div class="opts"><button>Too much</button><button class="on">Just right</button><button>Ran out</button></div>
     <button class="save" id="sheetSave">Save</button>
+  </div>
+  <div class="dsheet" id="dsheet">
+    <div class="shead"><b>A drink for the break</b><button class="x" id="dX" aria-label="Close"><svg viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8"/></svg></button></div>
+    <p class="note">Ready with your refill at 22:22, counter 2.</p>
+    <div class="drinks" id="drinks">
+      <button data-p="16"><img src="snacks/soda.png" alt=""><b>Cola</b><span>₪16</span></button>
+      <button data-p="16"><img src="snacks/soda.png" alt=""><b>Cola zero</b><span>₪16</span></button>
+      <button data-p="9"><img src="snacks/bottle.png" alt=""><b>Water</b><span>₪9</span></button>
+    </div>
+    <button class="dpay" id="dPay"><b>Add to my order</b><span id="dSum">₪0</span></button>
   </div>
   <nav class="tabbar" id="tabbar"></nav>
   <div class="glow"></div>
@@ -383,6 +409,16 @@
     const pass = document.getElementById('pass'); let y0 = null;
     pass.addEventListener('touchstart', e => y0 = e.touches[0].clientY, { passive: true });
     pass.addEventListener('touchmove', e => { if (y0 !== null && e.touches[0].clientY - y0 > 70) { y0 = null; phone.classList.remove('passOn'); } }, { passive: true }); }
+  // Add a drink for the break.
+  { const sh = () => phone.classList.toggle('dsheetOn'); let sum = 0;
+    document.getElementById('addDrink').addEventListener('click', e => { e.preventDefault(); phone.classList.add('dsheetOn'); });
+    document.getElementById('dX').addEventListener('click', () => phone.classList.remove('dsheetOn'));
+    document.getElementById('drinks').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; b.classList.toggle('on');
+      sum = [...document.querySelectorAll('#drinks .on')].reduce((a, x) => a + +x.dataset.p, 0); document.getElementById('dSum').textContent = '₪' + sum; });
+    document.getElementById('dPay').addEventListener('click', () => { const n = [...document.querySelectorAll('#drinks .on b')].map(x => x.textContent);
+      phone.classList.remove('dsheetOn'); if (!n.length) return;
+      const r = document.querySelector('#refill .order > div:nth-child(2)'); if (r) r.innerHTML = '<b>Popcorn L refill</b><p class="note">+ ' + n.join(', ') + '. Ready at 22:22</p>';
+      document.getElementById('addDrink').style.display = 'none'; }); }
 </script>
 </body>
 </html>
