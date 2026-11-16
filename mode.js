@@ -19,3 +19,6 @@
 (() => { const st = document.createElement('style');
   st.textContent = '.pill, .tile.settings, .tap, .tonight, .tile.rate, .drinks button, .opts button { transition: transform .18s ease, filter .18s ease; } .pill:active, .tile.settings:active, .tap:active, .tonight:active, .tile.rate:active, .drinks button:active, .opts button:active { transform: scale(.96); filter: brightness(1.2); }';
   document.head.appendChild(st); })();
+// Outside this computer (the published site), the side panels for comparing versions never show.
+(() => { if (/^(localhost|127\.0\.0\.1|192\.168\.)/.test(location.hostname)) return;
+  const st = document.createElement('style'); st.textContent = '.controls{display:none!important} body{gap:0!important}'; document.head.appendChild(st); })();

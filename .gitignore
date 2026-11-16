@@ -1,3 +1,16 @@
 # Saved versions kept only on this computer
 *-v[0-9]*.html
 *-premode.html
+# Working pages: comparisons, demos and drafts stay on this computer
+*-compare*.html
+*-src.html
+alt-adtime.html
+assistant-demo.html
+components.html
+countdown-demo.html
+designed.html
+film-design-blue.html
+home-design-before-type.html
+red-fonts.html
+representative.html
+type-v8.css
