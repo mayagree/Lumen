@@ -22,3 +22,9 @@
 // Outside this computer (the published site), the side panels for comparing versions never show.
 (() => { if (/^(localhost|127\.0\.0\.1|192\.168\.)/.test(location.hostname)) return;
   const st = document.createElement('style'); st.textContent = '.controls{display:none!important} body{gap:0!important}'; document.head.appendChild(st); })();
+// For exports: ?act=click:SELECTOR|wait:MS|... runs taps in order once the page has settled.
+(() => { const a = new URLSearchParams(location.search).get('act'); if (!a) return;
+  addEventListener('load', () => setTimeout(async () => {
+    for (const step of a.split('|')) { const i = step.indexOf(':'), k = step.slice(0, i), v = step.slice(i + 1);
+      if (k === 'wait') await new Promise(r => setTimeout(r, +v));
+      if (k === 'click') { const el = document.querySelector(v); if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })); await new Promise(r => setTimeout(r, 350)); } } }, 1800)); })();
