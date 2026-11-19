@@ -661,7 +661,13 @@
 
   (() => { const q = new URLSearchParams(location.search); if (!q.get('still')) return;
     const ph = document.getElementById('phone'); if (q.get('band') === '0') ph.classList.add('noband');
-    document.head.insertAdjacentHTML('beforeend', '<style>.arrive .scroll > *, .arrive .tabbar, .arrive .hello .w { opacity: 1 !important; filter: none !important; transform: none !important; }</style>');
+    document.head.insertAdjacentHTML('beforeend', '<style>.arrive .scroll > *, .arrive .tabbar, .arrive .hello .w { opacity: 1 !important; filter: none !important; transform: none !important; }  /* Chosen tab: no pill. The others step back; the chosen one is bright, its icon fills, its name is heavier. */
+  .tabbar a.on::before, .tabbar span.on::before { content: none !important; }
+  .tabbar a, .tabbar span { color: rgba(244,248,251,.4) !important; transition: color .35s ease; }
+  .tabbar a.on, .tabbar span.on { color: var(--ink) !important; font-weight: 600 !important; }
+  .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
+  .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
+</style>');
     setTimeout(() => { ph.classList.add('drawn', 'speaking');
       const sc = document.getElementById('scroll'), lab = document.getElementById('railTitle'); sc.scrollTop = lab.offsetTop - 40;
       lab.innerHTML = '<em>Lumen</em> · Your highest match tonight';

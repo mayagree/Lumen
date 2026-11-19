@@ -206,6 +206,12 @@
   .drinks b { font: 500 14px/1.2 var(--f-text); } .drinks span { font: var(--t-number-s); font-size: 16px; color: var(--soft); }
   .dpay { width: 100%; height: 56px; margin-top: var(--s-2); border-radius: 28px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; background: rgba(244,248,251,.16); font: var(--t-button); }
   .dpay span { font: var(--t-number-s); }
+  /* Chosen tab: no pill. The others step back; the chosen one is bright, its icon fills, its name is heavier. */
+  .tabbar a.on::before, .tabbar span.on::before { content: none !important; }
+  .tabbar a, .tabbar span { color: rgba(244,248,251,.4) !important; transition: color .35s ease; }
+  .tabbar a.on, .tabbar span.on { color: var(--ink) !important; font-weight: 600 !important; }
+  .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
+  .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
 </style>
 <script src="mode.js"></script>
 <script src="fullscreen.js"></script>

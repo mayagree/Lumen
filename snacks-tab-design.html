@@ -391,6 +391,12 @@
   @keyframes pay-swell { from { transform: translateX(-50%) scale(.25, .6); opacity: .35; } to { transform: translateX(-50%) scale(1, 1); opacity: 1; } }
   .paid .cta b, .paid .cta span { animation: paid-in .6s cubic-bezier(.2,.8,.2,1); }
   @keyframes paid-in { from { opacity: 0; filter: blur(6px); } }
+  /* Chosen tab: no pill. The others step back; the chosen one is bright, its icon fills, its name is heavier. */
+  .tabbar a.on::before, .tabbar span.on::before { content: none !important; }
+  .tabbar a, .tabbar span { color: rgba(244,248,251,.4) !important; transition: color .35s ease; }
+  .tabbar a.on, .tabbar span.on { color: var(--ink) !important; font-weight: 600 !important; }
+  .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
+  .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
 </style>
 <script src="mode.js"></script>
 <script src="fullscreen.js"></script>
