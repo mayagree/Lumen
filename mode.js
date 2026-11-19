@@ -28,3 +28,7 @@
     for (const step of a.split('|')) { const i = step.indexOf(':'), k = step.slice(0, i), v = step.slice(i + 1);
       if (k === 'wait') await new Promise(r => setTimeout(r, +v));
       if (k === 'click') { const el = document.querySelector(v); if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true })); await new Promise(r => setTimeout(r, 350)); } } }, 1800)); })();
+// The phone frame clips everything inside it at its rounded corners, also glows that blur or scale (overflow alone can leak there).
+(() => { const st = document.createElement('style');
+  st.textContent = '.phone{clip-path:inset(0 round 46px)} @media (max-width:700px){.phone{clip-path:none}}';
+  document.head.appendChild(st); })();
