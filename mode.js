@@ -9,7 +9,7 @@
 (() => { if (!new URLSearchParams(location.search).get('export')) return;
   const st = document.createElement('style'); st.textContent = '.controls{display:none!important} body{gap:0!important}' + (new URLSearchParams(location.search).get('export') === '2' ? ' .phone *{transition-duration:0s!important;transition-delay:0s!important}' : '');
   document.head.appendChild(st);
-  addEventListener('load', () => setTimeout(() => { const ph = document.getElementById('phone'); if (ph) ph.classList.remove('in', 'reveal'); }, 1200)); })();
+  addEventListener('load', () => setTimeout(() => { const ph = document.getElementById('phone'); if (ph) ph.classList.remove('in', 'reveal', 'arrive'); }, 1200)); })();
 // ?tall=1: for long exports: the phone grows to its full content, fixed bars stay at its bottom.
 (() => { if (!new URLSearchParams(location.search).get('tall')) return;
   const st = document.createElement('style');
@@ -31,4 +31,24 @@
 // The phone frame clips everything inside it at its rounded corners, also glows that blur or scale (overflow alone can leak there).
 (() => { const st = document.createElement('style');
   st.textContent = '.phone{clip-path:inset(0 round 46px)} @media (max-width:700px){.phone{clip-path:none}}';
+  document.head.appendChild(st); })();
+// For exports: ?booked=1 starts the page as if a ticket was already bought.
+(() => { if (new URLSearchParams(location.search).get('booked')) try { sessionStorage.setItem('lumenBooked', '1'); } catch (e) {} })();
+// For exports only: ?hold=voice keeps Lumen speaking (full glow) once it starts, so the shot never lands mid-fade.
+(() => { if (new URLSearchParams(location.search).get('hold') !== 'voice') return;
+  const keep = el => { if (!el) return; let on = el.classList.contains('speaking');
+    new MutationObserver(() => { if (el.classList.contains('speaking')) on = true; else if (on) el.classList.add('speaking'); })
+      .observe(el, { attributes: true, attributeFilter: ['class'] }); };
+  keep(document.documentElement); addEventListener('DOMContentLoaded', () => keep(document.getElementById('phone'))); })();
+// For exports only: the capturing browser can wait forever for web fonts, so "fonts ready" also fires after 1.5s.
+(() => { if (!new URLSearchParams(location.search).get('export')) return;
+  try { const f = document.fonts, orig = f.ready; Object.defineProperty(f, 'ready', { configurable: true, get: () => Promise.race([orig, new Promise(r => setTimeout(() => r(f), 1500))]) }); } catch (e) {} })();
+// For exports only: some capturing browsers never run animation frames, so frames also run on a timer.
+(() => { if (!new URLSearchParams(location.search).get('export')) return;
+  const raf = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = cb => { let done = false; const go = t => { if (!done) { done = true; cb(t); } };
+    raf(go); setTimeout(() => go(performance.now()), 20); return 0; }; })();
+// For exports only: CSS animations jump to their end, since the capturing browser may not play them.
+(() => { if (!new URLSearchParams(location.search).get('export')) return;
+  const st = document.createElement('style'); st.textContent = '.phone *, .phone *::before, .phone *::after { animation-duration: .001s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; animation-fill-mode: both !important; }';
   document.head.appendChild(st); })();

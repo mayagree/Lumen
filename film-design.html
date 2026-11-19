@@ -543,6 +543,8 @@
   /* Lumen off: no red marks, no suggestion line. */
   html[data-lumen="off"] .day.on::before, html[data-lumen="off"] .time.on::before { background: var(--ink) !important; }
   html[data-lumen="off"] #info { visibility: hidden; }
+  /* Behind the Choose seats bar: content fades out at the bottom edge, so text never runs under it. */
+  .scroll { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.12) calc(100% - 40px)); mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.12) calc(100% - 40px)); }
 </style>
 <script src="mode.js?v=2"></script>
 <script src="fullscreen.js"></script>
