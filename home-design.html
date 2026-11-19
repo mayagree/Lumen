@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="stack">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,14 +11,16 @@
   :root {
     --ink: #ffffff;
     --soft: rgba(255,255,255,.78);
-    --accent: #eef35a;
-    --accent-ink: #12140a;
-    --display: "Archivo", sans-serif;
-    --display-size: 34px;
-    --display-track: -.02em;
-    --display-stretch: 125%;
-    --display-weight: 700;
-    --badge-size: 30px;
+    /* The locked look is the default here, so nothing else shows while the page loads. */
+    --accent: #ff3b2f;
+    --accent-ink: #fff;
+    --display: "Anton", sans-serif;
+    --display-size: 40px;
+    --display-track: .01em;
+    --display-stretch: 100%;
+    --display-weight: 400;
+    --badge-size: 40px;
+    --hello-scale: 2;
     --mono: "JetBrains Mono", ui-monospace, monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -375,13 +377,19 @@
   .sres .r b { display: block; font: 500 16px/1.3 var(--f-text); }
   .sres .r span { display: block; margin-top: 2px; font: var(--t-label); letter-spacing: .04em; text-transform: uppercase; color: var(--soft); }
   .typing .search .ask { display: none; }
+  /* Chosen tab: no pill. The others step back; the chosen one is bright, its icon fills, its name is heavier. */
+  .tabbar a.on::before, .tabbar span.on::before { content: none !important; }
+  .tabbar a, .tabbar span { color: rgba(244,248,251,.4) !important; transition: color .35s ease; }
+  .tabbar a.on, .tabbar span.on { color: var(--ink) !important; font-weight: 600 !important; }
+  .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
+  .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
 </style>
 <script src="mode.js"></script>
 <script src="fullscreen.js"></script>
 <script src="countdown.js"></script>
 </head>
 <body>
-<div class="phone" id="phone">
+<div class="phone arrive" id="phone">
   <div class="wash" id="washA"></div><div class="wash" id="washB" style="opacity:0"></div>
   <div class="veil"></div><div class="grain"></div>
 
@@ -661,13 +669,7 @@
 
   (() => { const q = new URLSearchParams(location.search); if (!q.get('still')) return;
     const ph = document.getElementById('phone'); if (q.get('band') === '0') ph.classList.add('noband');
-    document.head.insertAdjacentHTML('beforeend', '<style>.arrive .scroll > *, .arrive .tabbar, .arrive .hello .w { opacity: 1 !important; filter: none !important; transform: none !important; }  /* Chosen tab: no pill. The others step back; the chosen one is bright, its icon fills, its name is heavier. */
-  .tabbar a.on::before, .tabbar span.on::before { content: none !important; }
-  .tabbar a, .tabbar span { color: rgba(244,248,251,.4) !important; transition: color .35s ease; }
-  .tabbar a.on, .tabbar span.on { color: var(--ink) !important; font-weight: 600 !important; }
-  .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
-  .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
-</style>');
+    document.head.insertAdjacentHTML('beforeend', '<style>.arrive .scroll > *, .arrive .tabbar, .arrive .hello .w { opacity: 1 !important; filter: none !important; transform: none !important; }</style>');
     setTimeout(() => { ph.classList.add('drawn', 'speaking');
       const sc = document.getElementById('scroll'), lab = document.getElementById('railTitle'); sc.scrollTop = lab.offsetTop - 40;
       lab.innerHTML = '<em>Lumen</em> · Your highest match tonight';
