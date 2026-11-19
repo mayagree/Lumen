@@ -166,7 +166,7 @@
   .card.rec::before { opacity: 0; transition: opacity .9s ease; }
   .card::after { content: ""; position: absolute; inset: 0; height: 500px; border-radius: 26px; pointer-events: none; z-index: 3;
     box-shadow: 0 0 0 2px rgba(255,59,47,.9); opacity: 0; transition: opacity .7s ease; }
-  .card.picked, .card.focus { transform: scale(1.02); }
+  .card.picked, .card.focus { transform: none; } /* No scale: scaling broke the masked blur band in Chrome. */
   .card.picked::after { opacity: 1; }
   .card.rec::before, .card.picked::before { content: ""; position: absolute; inset: -2.5px; height: auto; border-radius: 28px; z-index: -1;
     background: rgba(255,59,47,.9); filter: blur(1.5px); opacity: 0; transition: opacity 1s ease; }
@@ -384,7 +384,7 @@
   .tabbar a svg, .tabbar span svg { transition: fill .35s ease, stroke-width .35s ease; }
   .tabbar a.on svg, .tabbar span.on svg { fill: rgba(244,248,251,.28); stroke-width: 1.8; }
 </style>
-<script src="mode.js?v=2"></script>
+<script src="mode.js?v=3"></script>
 <script src="fullscreen.js"></script>
 <script src="countdown.js"></script>
 </head>
