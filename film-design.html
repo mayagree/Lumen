@@ -545,6 +545,10 @@
   html[data-lumen="off"] #info { visibility: hidden; }
   /* Behind the Choose seats bar: content fades out at the bottom edge, so text never runs under it. */
   .scroll { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.12) calc(100% - 40px)); mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.12) calc(100% - 40px)); }
+  /* "Suggested" carries the same red line as Lumen's pick, so the legend reads at a glance. */
+  .note-sug u { display: inline-block; line-height: 1.3; padding-bottom: 3px; border-bottom: 2px solid var(--accent) !important; }
+  /* While Lumen speaks, its words sit at the bottom: no fade over them. */
+  .speaking .scroll, .speaking.scroll { -webkit-mask-image: none; mask-image: none; }
 </style>
 <script src="mode.js?v=2"></script>
 <script src="fullscreen.js"></script>
