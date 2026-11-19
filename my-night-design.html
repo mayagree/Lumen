@@ -348,7 +348,7 @@
   const early = (() => { const at = new Date(); at.setHours(20, 40, 0, 0); let m = Math.round((at - new Date()) / 60000); return m <= 0 || m > 360 ? 192 : m; })();
   let stage = 0;
   const COUNT = [['Starts in', null], ['Starts in', 38], ['Starts in', 24], ['Playing', '1:02<small>in</small>'], ['Ended', '22:44']];
-  const setStage = n => { stage = n;
+  const setStage = n => { stage = n; try { sessionStorage.setItem('lumenStage', n); } catch (e) {}
     document.getElementById('countLabel').textContent = COUNT[n][0];
     const v = COUNT[n][1], L = document.getElementById('left'); if (v === null) lumenCount(L, early); else if (typeof v === 'number') lumenCount(L, v); else { lumenStop(L); L.innerHTML = v; }
     document.querySelectorAll('.tile[data-show]').forEach(t => {
@@ -359,7 +359,7 @@
     phone.classList.toggle('after', n === 4);
     clearTimeout(window.sheetT); phone.classList.remove('sheetOn');
     if (n === 4) window.sheetT = setTimeout(() => phone.classList.add('sheetOn'), 1200); };
-  setStage(q.get('stage') === 'near' ? 2 : +(q.get('stage') || 0) || 0);
+  setStage(q.get('stage') === 'near' ? 2 : q.get('stage') ? +q.get('stage') || 0 : +(sessionStorage.getItem('lumenStage') || 0));
   document.getElementById('count').addEventListener('click', e => { e.stopPropagation(); setStage((stage + 1) % 5);
     const first = document.querySelector('.tile:not(.later)'), sc = document.getElementById('scroll');
     if (first && stage > 0) sc.scrollTo({ top: first.offsetTop - 120, behavior: 'smooth' }); else sc.scrollTo({ top: 0, behavior: 'smooth' }); });

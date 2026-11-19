@@ -49,7 +49,7 @@
 
   .list { width: 230px; }
   .list .stack { display: flex; height: 110px; }
-  .list .stack i { flex: 1; margin-left: -26px; border-radius: 10px; background: center / cover; box-shadow: none; }
+  .list .stack i { flex: 1; margin-left: -32px; border-radius: 10px; background: center / cover; box-shadow: none; }
   .list .stack i:first-child { margin-left: 0; }
   .list b { display: block; margin-top: 12px; font: 500 17px/1.3 var(--f-text); }
 
@@ -139,6 +139,120 @@
   .lumenbtn svg { stroke-linecap: round; }
   .lumenbtn svg .d { fill: var(--ink); stroke: none; }
   .lumenbtn.off svg .d { fill: var(--faint); }
+
+  /* ===== Sketches: fewer boxes. html[data-v] = a | b | c ===== */
+  html[data-v] .tile { background: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-radius: 0; padding: 0; }
+  html[data-v] section { padding-top: 40px; }
+  html[data-v] section > .label { margin-bottom: var(--s-2); padding-bottom: 10px; border-bottom: 1px solid rgba(244,248,251,.16); }
+  html[data-v] .rows { padding: 0; }
+  html[data-v] .row { padding: 15px 0; }
+  html[data-v] .settings { padding: 0; height: 52px; border-top: 1px solid rgba(244,248,251,.16); }
+  html[data-v] .upcoming .thumb { width: 64px; height: 92px; border-radius: 10px; }
+  html[data-v] .upcoming b { font: var(--t-display-m) !important; font-size: 34px !important; }
+  html[data-v] .upcoming .tc b { font: 430 30px/1 var(--f-number) !important; letter-spacing: .02em; }
+  .only { display: none !important; }
+
+  /* A and C: notes become a quiet column of quotes, in the notes face. */
+  html[data-v="a"] #notes .rail, html[data-v="c"] #notes .rail { flex-direction: column; overflow: visible; gap: 0; scroll-snap-type: none; }
+  html[data-v="a"] .notecard, html[data-v="c"] .notecard { width: auto; display: grid; grid-template-columns: 44px 1fr; column-gap: 14px; padding: 16px 0 !important; border-top: 1px solid rgba(244,248,251,.1); }
+  html[data-v="a"] .notecard:first-child, html[data-v="c"] .notecard:first-child { border-top: 0; padding-top: 0 !important; }
+  html[data-v="a"] .notecard .film, html[data-v="c"] .notecard .film { display: contents; }
+  html[data-v="a"] .notecard .film > div, html[data-v="c"] .notecard .film > div { grid-column: 2; }
+  html[data-v="a"] .notecard .thumb, html[data-v="c"] .notecard .thumb { grid-row: 1 / span 2; }
+  html[data-v="a"] .notecard .quote, html[data-v="c"] .notecard .quote { grid-column: 2; margin-top: 6px; font: var(--t-note); letter-spacing: .02em; color: var(--soft); }
+  html[data-v="a"] .list, html[data-v="c"] .list { width: 200px; }
+
+  /* B: numbers, like the showtimes. A small caps caption on top, a big condensed value under it. */
+  html[data-v="b"] .only.b { display: grid !important; }
+  .stats { grid-template-columns: repeat(3, 1fr); margin-top: var(--s-3); padding: 0 var(--edge); }
+  .stats div { display: flex; flex-direction: column; gap: 4px; }
+  .stats div + div { padding-left: 16px; border-left: 1px solid rgba(244,248,251,.14); }
+  .stats b { font: 430 34px/1 var(--f-number); letter-spacing: .02em; }
+  .figs { grid-template-columns: 1fr 1fr; row-gap: 26px; column-gap: 16px; }
+  .figs > div { display: flex; flex-direction: column; gap: 6px; }
+  .figs b { font: 430 26px/1.1 var(--f-number); letter-spacing: .02em; }
+  .figs p { font: 400 13px/1.4 var(--f-text); color: var(--faint); }
+  .club { display: flex; gap: 5px; margin-top: 6px; }
+  .club i { flex: 1; height: 3px; border-radius: 2px; background: rgba(244,248,251,.18); }
+  .club i.on { background: var(--ink); }
+  html[data-v="b"] #learned .rows, html[data-v="b"] #wallet .rows { display: none; }
+  html[data-v="b"] .notecard { width: 250px; padding-left: 14px !important; border-left: 1px solid rgba(244,248,251,.16); }
+  html[data-v="b"] .notecard .quote { font: var(--t-note); letter-spacing: .02em; }
+  html[data-v="b"] .list { width: 190px; }
+
+  /* C: the next film is the hero, set big. */
+  html[data-v="c"] .upcoming { display: grid; grid-template-columns: 1fr; }
+  html[data-v="c"] .upcoming .thumb { display: none; }
+  html[data-v="c"] .upcoming .tx, html[data-v="c"] .upcoming .tc { display: block; padding: 0; }
+  html[data-v="c"] .upcoming .tx b { font-size: 64px !important; line-height: .92 !important; margin-top: 10px !important; display: block; }
+  html[data-v="c"] .upcoming .tc { display: flex; align-items: baseline; justify-content: space-between; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(244,248,251,.16); }
+  html[data-v="c"] .upcoming .tc b { font-size: 40px !important; }
+  html[data-v="c"] .watched { width: 112px; }
+  html[data-v="c"] .watched .p { height: 158px; }
+
+  /* D = B's top and lists, with notes (data-n) and end (data-e) options. */
+  html[data-v="d"] .only.b { display: grid !important; }
+  html[data-v="d"] #notes .label, html[data-v="d"] .notecard { border-left: 0 !important; }
+  html[data-v="d"] .notecard { padding: 0 !important; }
+  html[data-v="d"] .rail { gap: 22px; }
+  /* n1: the quote leads, the film is a small signature under it. */
+  html[data-n="1"] .notecard { width: 250px; display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 14px; }
+  html[data-n="1"] .notecard .quote { margin: 0; font: 400 17px/1.4 var(--f-text); color: var(--ink); }
+  html[data-n="1"] .notecard .quote em { color: var(--faint); }
+  html[data-n="1"] .notecard .thumb { width: 26px; height: 37px; border-radius: 5px; }
+  html[data-n="1"] .notecard .film b { font-size: 14px; }
+  /* n2: as before, without the rule. */
+  html[data-n="2"] .notecard { width: 240px; }
+  html[data-n="2"] .notecard .quote { font: var(--t-note); letter-spacing: .02em; }
+  /* n3: a big quote mark, the note in the notes face, poster on the right. */
+  html[data-n="3"] .notecard { width: 250px; position: relative; padding-top: 30px !important; }
+  html[data-n="3"] .notecard::before { content: "\201C"; position: absolute; top: -14px; left: -2px; font: 400 64px/1 Georgia, serif; color: var(--faint); }
+  html[data-n="3"] .notecard { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 12px; }
+  html[data-n="3"] .notecard .quote { margin: 0; font: var(--t-note); font-size: 13px; letter-spacing: .02em; color: var(--ink); }
+  html[data-n="3"] .notecard .film { flex-direction: row-reverse; justify-content: flex-end; }
+  html[data-n="3"] .notecard .thumb { width: 30px; height: 42px; border-radius: 6px; }
+  html[data-n="3"] .notecard .film b { font-size: 14px; }
+  /* End, e1: keep the one glass box per group, as it is today. */
+  html[data-v="d"][data-e="1"] .figs { display: none !important; }
+  html[data-e="1"] #wallet .rows, html[data-e="1"] #learned .rows { display: block !important; padding: 4px 18px; border-radius: 22px;
+    background: rgba(244,248,251,.08) !important; backdrop-filter: blur(10px) saturate(1.3) !important; }
+  html[data-e="1"] #wallet .label, html[data-e="1"] #learned .label { border: 0; padding-bottom: 0; margin-bottom: var(--s-1); }
+  html[data-e="1"] .settings { border: 0; padding: 0 18px; border-radius: 22px; background: rgba(244,248,251,.08) !important; }
+  /* e2: open, an eyebrow and a value only. */
+  html[data-e="2"] #wallet .rows, html[data-e="2"] #learned .rows { display: none; }
+  html[data-e="2"] .figs p { display: none; }
+  /* n4: notes keep their glass cards, as today; only the lists are open. */
+  html[data-n="4"] .notecard { width: 270px; padding: 16px 18px !important; border-radius: 22px; background: rgba(244,248,251,.08) !important; }
+  html[data-n="4"] .notecard .quote { font: var(--t-note); letter-spacing: .02em; }
+  html[data-n="4"] .rail { gap: 10px; }
+  /* n5: open notes; big quote marks open and close each note, so the marks are its edges. */
+  html[data-n="5"] .notecard { width: 250px; }
+  html[data-n="5"] .notecard .quote { position: relative; margin-top: 18px; padding: 14px 0 18px; font: var(--t-note); letter-spacing: .02em; }
+  html[data-n="5"] .notecard .quote::before, html[data-n="5"] .notecard .quote::after { position: absolute; font: 400 44px/1 Georgia, serif; color: var(--faint); }
+  html[data-n="5"] .notecard .quote::before { content: "\201C"; left: -2px; top: -10px; }
+  html[data-n="5"] .notecard .quote::after { content: "\201D"; right: 0; bottom: -22px; }
+  /* l0: no rule under the section names; more air instead. */
+  html[data-l="0"] section > .label { border: 0 !important; padding-bottom: 0; margin-bottom: 14px; }
+  html[data-v][data-s="0"] .only.stats { display: none !important; }
+  /* Stats moved down: under Watched, open; or as the first line inside the Learned box. */
+  html[data-v][data-s][data-st="watched"] .only.stats { display: grid !important; padding: 0; margin-top: 28px; }
+  html[data-v][data-s][data-st="watched"] .stats b { font-size: 28px; }
+  html[data-v][data-s][data-st="box"] .only.stats { display: grid !important; padding: 16px 0 14px; margin: 0; }
+  html[data-v][data-s][data-st="box"] .stats b { font-size: 26px; }
+  /* Stats with more air: bigger, and optionally centered. */
+  html[data-v][data-s][data-st="watched"][data-sz] .only.stats { margin: 44px 0 2px; }
+  html[data-v][data-s][data-st="watched"][data-sz] .stats b { font-size: 40px; }
+  html[data-sz="center"] .stats div { align-items: center; text-align: center; }
+  html[data-sz="center"] .stats div + div { padding-left: 0; }
+  /* l2: the rule hugs its label, with more air below it before the content. */
+  html[data-l="2"] section > .label { padding-bottom: 9px; margin-bottom: 22px; border-bottom-color: rgba(244,248,251,.09); }
+  html[data-l="2"] section { padding-top: 38px; }
+  /* l3: no rule, but the sections stand further apart so the labels hold their content. */
+  html[data-l="3"] section > .label { border: 0 !important; padding-bottom: 0; margin-bottom: 14px; }
+  html[data-l="3"] section { padding-top: 54px; }
+  /* Behind the tab bar: content fades out at the bottom edge, and the bar's glass is denser. */
+  html[data-v] .scroll { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.15) calc(100% - 40px)); mask-image: linear-gradient(180deg, #000 calc(100% - 150px), rgba(0,0,0,.15) calc(100% - 40px)); }
+  html[data-v] .tabbar { backdrop-filter: blur(34px) saturate(1.3) brightness(.9); -webkit-backdrop-filter: blur(34px) saturate(1.3) brightness(.9); }
 </style>
 <script src="mode.js"></script>
 <script src="fullscreen.js"></script>
@@ -150,6 +264,7 @@
   <div class="scroll">
     <div class="head"><h1>Idan</h1><button class="lumenbtn" id="lumenBtn" aria-label="Lumen, how much it leads"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><circle cx="19.20" cy="12.00" r=".9" class="d"/><circle cx="17.09" cy="17.09" r=".9" class="d"/><circle cx="12.00" cy="19.20" r=".9" class="d"/><circle cx="6.91" cy="17.09" r=".9" class="d"/><circle cx="4.80" cy="12.00" r=".9" class="d"/><circle cx="6.91" cy="6.91" r=".9" class="d"/><circle cx="12.00" cy="4.80" r=".9" class="d"/><circle cx="17.09" cy="6.91" r=".9" class="d"/></svg></button></div>
 
+    <div class="only b stats"><div><span class="label dim">Films</span><b>23</b></div><div><span class="label dim">Hours</span><b>51</b></div><div><span class="label dim">Avg</span><b>3.9</b></div></div>
     <section id="upcoming">
       <span class="label dim">Upcoming</span>
       <a class="tile upcoming" href="my-night-design.html">
@@ -159,7 +274,7 @@
       </a>
     </section>
 
-    <section>
+    <section id="notes">
       <span class="label dim">Notes</span>
       <div class="rail">
         <div class="tile notecard"><div class="film"><i class="thumb" style="background-image:url('posters/verity.webp')"></i><div><b>Verity</b><span class="label dim">Not seen yet, 2 Oct</span></div></div>
@@ -199,16 +314,22 @@
       </div>
     </section>
 
-    <section>
+    <section id="wallet">
       <span class="label dim">Wallet</span>
+      <div class="only b figs"><div><span class="label dim">Student card</span><b>&minus;25%</b><p>Applied on its own</p></div>
+        <div><span class="label dim">Lumen Club</span><b>4 of 6</b><div class="club"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div></div>
       <div class="tile rows">
         <div class="row"><span>Student card</span><span class="chip">Auto-applied</span></div>
         <div class="row"><span>Lumen Club</span><span><b>4 of 6</b> <span class="chev">›</span></span></div>
       </div>
     </section>
 
-    <section>
+    <section id="learned">
       <span class="label dim">Learned from your nights</span>
+      <div class="only b figs"><div style="grid-column:1/-1"><span class="label dim">Usual time</span><b>Weekends, 20:00+</b><p>Weekends</p></div>
+        <div><span class="label dim">Seats</span><b>Center, F&ndash;G</b><p>Center</p></div>
+        <div><span class="label dim">Popcorn for two</span><b>L</b><p>Just right, 3 times</p></div>
+        <div><span class="label dim">Promos</span><b>Skip</b><p>Arrive 15 min later</p></div></div>
       <div class="tile rows">
                 <div class="row"><span>Usual time</span><b>Weekends, after 20:00</b></div>
         <div class="row"><span>Seats</span><b>Center, rows F–G</b></div>
@@ -241,7 +362,10 @@
   };
   document.getElementById('tabbar').innerHTML = [['films', 'Films', 'home-design.html'], ['night', 'My night', 'my-night-design.html'], ['snacks', 'Snacks', 'snacks-tab-design.html'], ['me', 'Me', '#']]
     .map(([k, n, h]) => `<a class="${k === 'me' ? 'on' : ''}" href="${h}">${ICON[k]}${n}</a>`).join('');
-  if (!sessionStorage.getItem('lumenBooked')) document.getElementById('upcoming').remove();
+  { const u = new URLSearchParams(location.search), d = document.documentElement; const D = { v: 'd', n: '4', e: '1', s: '0', o: 'low', st: 'watched', sz: 'center', l: '2' }; for (const k in D) if (!u.has(k)) u.set(k, D[k]); d.dataset.v = u.get('v') || 'a'; if (u.get('n')) d.dataset.n = u.get('n'); if (u.get('e')) d.dataset.e = u.get('e'); if (u.get('l')) d.dataset.l = u.get('l'); if (u.get('s') === '0') d.dataset.s = '0'; d.dataset.st = u.get('st') || ''; d.dataset.sz = u.get('sz') || '';
+    if (u.get('st')) addEventListener('DOMContentLoaded', () => { const st = document.querySelector('.stats'), w = [...document.querySelectorAll('section')].find(x => /Watched/.test(x.textContent.slice(0, 40)));
+      if (u.get('st') === 'watched') w.append(st); else document.querySelector('#learned .rows').prepend(st); });
+    if (u.get('o') === 'low') addEventListener('DOMContentLoaded', () => { const n = document.getElementById('notes'); document.getElementById('wallet').before(n); }); } if (!sessionStorage.getItem('lumenBooked') || sessionStorage.getItem('lumenStage') === '4') document.getElementById('upcoming').remove();
   document.querySelectorAll('.watched .stars').forEach(el => el.innerHTML = [0, 1, 2, 3, 4].map(i => `<i class="${i < +el.dataset.n ? 'on' : ''}"></i>`).join(''));
   document.getElementById('ads').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; e.currentTarget.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); });
   document.fonts.ready.then(() => requestAnimationFrame(() => requestAnimationFrame(() => document.getElementById('phone').classList.remove('in'))));
